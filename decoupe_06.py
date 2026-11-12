@@ -53,6 +53,10 @@ def ecrire_tuile(chemin, e):
         q(e.noise_n.values if "noise_n" in e else e.noise.values - 8, 4, 30),
         # un octet par nœud : bit 0 = feux tricolores (voir signaux_06.py)
         np.isin(noeuds, SIGNAUX).astype(np.uint8),
+        # accidents de vélo 2020-2024 rattachés au bout de rue (accidents_06.py), plafonnés à 254
+        np.minimum(e.acc_velo.values if "acc_velo" in e else np.zeros(m), 254).astype(np.uint8),
+        # zone du plan d'exposition au bruit des aérodromes (avions_06.py) : 0 aucune, 1 = D ... 4 = A
+        (e.avion.values if "avion" in e else np.zeros(m)).astype(np.uint8),
     ]
     corps = b"".join(b.tobytes() for b in blocs)
     # compressé en gzip : Cloudflare ne compresse pas les fichiers binaires, la page les décompresse elle-même
@@ -84,6 +88,8 @@ def lire_tuile(chemin):
         t["noise_n"] = lire("u1", m) / 4.0 + 30
     if p + n <= len(d):
         t["feux"] = lire("u1", n)
+    if p + 2 * m <= len(d):
+        t["acc_velo"] = lire("u1", m); t["avion"] = lire("u1", m)
     t["oneway"] = (t["flags"] & 3).astype(int) - 1
     t["lit"] = ((t["flags"] >> 2) & 3).astype(int) - 1
     t["noise_src"] = (t["flags"] >> 4) & 1

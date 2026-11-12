@@ -9,8 +9,11 @@ Mise à jour complète des données d'Oncyal 06 (à lancer chaque trimestre, ou 
   2. lumiere_06.py            lumière satellite NASA
   3. bruit_complement_06.py   bruit estimé là où le Cerema ne couvre pas
   3b. nuit_06.py              bruit de nuit (Lnight du Cerema)
+  3c. avions_06.py            bruit des aérodromes (plans d'exposition au bruit, data/avions)
+  3d. lampadaires_06.py       rues éclairées d'après les lampadaires OSM
   4. acces_06.py              voies privées, sens uniques vélo, barrières
   5. zones_06.py              accès incertains : horaires d'ouverture, enceintes, parcs (out/tuiles/zones.json)
+  5a. accidents_06.py         accidents de vélo 2020-2024 (ONISR, data/accidents)
   5b. signaux_06.py           feux tricolores (out/signaux.npy)
   6. decoupe_06.py            tuiles compressées (out/tuiles)
   7. poi_06.py                fontaines, arceaux, ateliers, magasins (out/tuiles/poi.json)
@@ -25,7 +28,7 @@ import datetime, glob, os, re, shutil, subprocess, sys, time
 ICI = os.path.dirname(os.path.abspath(__file__))
 PY = sys.executable
 URL_OSM = "https://download.geofabrik.de/europe/france/provence-alpes-cote-d-azur-latest.osm.pbf"
-ETAPES = ["prepare_06.py", "lumiere_06.py", "bruit_complement_06.py", "nuit_06.py", "acces_06.py", "zones_06.py", "signaux_06.py", "decoupe_06.py", "poi_06.py"]
+ETAPES = ["prepare_06.py", "lumiere_06.py", "bruit_complement_06.py", "nuit_06.py", "avions_06.py", "lampadaires_06.py", "acces_06.py", "zones_06.py", "accidents_06.py", "signaux_06.py", "decoupe_06.py", "poi_06.py"]
 
 
 def telecharger():
