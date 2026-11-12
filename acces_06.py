@@ -10,6 +10,8 @@ acc (1 octet) :
             et des sens uniques implicites (ronds-points)
   bit 4     vélo explicitement autorisé (bicycle=yes/designated/permissive) : chemin utilisable même sans l'option « sentiers »
   bit 5     aménagement cyclable sur la chaussée (bande, piste, couloir bus)
+  bit 6     piste cyclable SÉPARÉE de la circulation le long de la route (cycleway=track), pas une simple bande peinte
+  bit 7     rue limitée à 30 km/h ou moins (maxspeed <= 30, zone 30, zone de rencontre, aire piétonne)
 
 Lancer :  python acces_06.py      (puis python decoupe_06.py)
 """
@@ -87,6 +89,24 @@ def amenage(t):
     return any(t.get(k, "") in AMENAGEMENT for k in ("cycleway", "cycleway:left", "cycleway:right", "cycleway:both"))
 
 
+def piste_separee(t):
+    return any(t.get(k, "") in ("track", "opposite_track") for k in ("cycleway", "cycleway:left", "cycleway:right", "cycleway:both"))
+
+
+def lente(t):
+    """Rue à 30 km/h ou moins."""
+    if t.get("highway") in ("living_street", "pedestrian"):
+        return True
+    for k in ("maxspeed", "zone:maxspeed", "maxspeed:type", "source:maxspeed"):
+        v = (t.get(k) or "").lower()
+        if v in ("walk", "fr:zone30", "fr:30", "fr:living_street", "fr:20") or "zone30" in v.replace(" ", ""):
+            return True
+    try:
+        return float((t.get("maxspeed") or "x").split()[0]) <= 30
+    except ValueError:
+        return False
+
+
 def main():
     import osmium
     if not os.path.exists(FICHIER):
@@ -133,6 +153,10 @@ def main():
             a |= 16
         if amenage(t):
             a |= 32
+        if piste_separee(t):
+            a |= 64
+        if lente(t):
+            a |= 128
         acc_way[w.id] = a
         refs = [n.ref for n in w.nodes]
         for r in barr.intersection(refs):

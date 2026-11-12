@@ -8,10 +8,13 @@ Mise à jour complète des données d'Oncyal 06 (à lancer chaque trimestre, ou 
   1. prepare_06.py            routes OSM + bruit Cerema + air AtmoSud
   2. lumiere_06.py            lumière satellite NASA
   3. bruit_complement_06.py   bruit estimé là où le Cerema ne couvre pas
+  3b. nuit_06.py              bruit de nuit (Lnight du Cerema)
   4. acces_06.py              voies privées, sens uniques vélo, barrières
-  5. decoupe_06.py            tuiles compressées (out/tuiles)
-  6. poi_06.py                fontaines, arceaux, ateliers, magasins (out/tuiles/poi.json)
-  7. copie de out/tuiles vers site/tuiles, et nouvelle VERSION dans site/sw.js (vide l'ancien cache hors ligne)
+  5. zones_06.py              accès incertains : horaires d'ouverture, enceintes, parcs (out/tuiles/zones.json)
+  5b. signaux_06.py           feux tricolores (out/signaux.npy)
+  6. decoupe_06.py            tuiles compressées (out/tuiles)
+  7. poi_06.py                fontaines, arceaux, ateliers, magasins (out/tuiles/poi.json)
+  8. copie de out/tuiles vers site/tuiles, et nouvelle VERSION dans site/sw.js (vide l'ancien cache hors ligne)
 Ensuite : vérifier le site en local, puis publier (robocopy vers Downloads\\oncyal, puis npx wrangler deploy).
 
 Bruit : quand le Cerema publiera les cartes de bruit stratégiques suivantes (échéance 2027), remplacer les fichiers
@@ -22,7 +25,7 @@ import datetime, glob, os, re, shutil, subprocess, sys, time
 ICI = os.path.dirname(os.path.abspath(__file__))
 PY = sys.executable
 URL_OSM = "https://download.geofabrik.de/europe/france/provence-alpes-cote-d-azur-latest.osm.pbf"
-ETAPES = ["prepare_06.py", "lumiere_06.py", "bruit_complement_06.py", "acces_06.py", "decoupe_06.py", "poi_06.py"]
+ETAPES = ["prepare_06.py", "lumiere_06.py", "bruit_complement_06.py", "nuit_06.py", "acces_06.py", "zones_06.py", "signaux_06.py", "decoupe_06.py", "poi_06.py"]
 
 
 def telecharger():
@@ -61,7 +64,8 @@ def main():
         shutil.copy2(os.path.join(src, f), os.path.join(dst, f))
     sw = os.path.join(ICI, "site", "sw.js")
     texte = open(sw, encoding="utf-8").read()
-    texte = re.sub(r"var VERSION = 'oncyal-[^']*';", f"var VERSION = 'oncyal-{datetime.date.today().isoformat()}';", texte)
+    version = datetime.datetime.now().strftime("%Y-%m-%d-%H%M")
+    texte = re.sub(r"var VERSION = 'oncyal-[^']*';", "var VERSION = 'oncyal-" + version + "';", texte)
     open(sw, "w", encoding="utf-8").write(texte)
     print(f"\nterminé en {(time.time() - t0) / 60:.0f} min. Vérifiez le site en local, puis publiez.")
 

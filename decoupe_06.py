@@ -14,6 +14,7 @@ DOSSIER = "out/tuiles"
 TS_LON, TS_LAT = 0.05, 0.04        # taille d'une zone en degrés
 MAGIC = b"CC01"
 NA = 255                            # « pas de donnée » pour les valeurs sur 1 octet
+SIGNAUX = np.load("out/signaux.npy") if os.path.exists("out/signaux.npy") else np.zeros(0, np.int64)   # nœuds à feux
 
 
 def q(v, echelle, decalage=0.0):
@@ -46,6 +47,12 @@ def ecrire_tuile(chemin, e):
         q(e.lum_nasa.values, 254),           # 0..1 x 254
         # accès OSM (voir acces_06.py), placé en dernier : une ancienne page l'ignore sans erreur
         (e.acc.values if "acc" in e else np.full(m, 4)).astype(np.uint8),
+        # accès incertains (voir zones_06.py) : numéro de zone dans tuiles/zones.json, 0 = aucune
+        (e.zone.values if "zone" in e else np.zeros(m)).astype("<u2"),
+        # bruit de nuit (voir nuit_06.py), même codage que le bruit de jour
+        q(e.noise_n.values if "noise_n" in e else e.noise.values - 8, 4, 30),
+        # un octet par nœud : bit 0 = feux tricolores (voir signaux_06.py)
+        np.isin(noeuds, SIGNAUX).astype(np.uint8),
     ]
     corps = b"".join(b.tobytes() for b in blocs)
     # compressé en gzip : Cloudflare ne compresse pas les fichiers binaires, la page les décompresse elle-même
@@ -71,6 +78,12 @@ def lire_tuile(chemin):
         t[nom] = np.where(o == NA, np.nan, o / echelle + dec)
     if p + m <= len(d):
         t["acc"] = lire("u1", m)
+    if p + 2 * m <= len(d):
+        t["zone"] = lire("<u2", m)
+    if p + m <= len(d):
+        t["noise_n"] = lire("u1", m) / 4.0 + 30
+    if p + n <= len(d):
+        t["feux"] = lire("u1", n)
     t["oneway"] = (t["flags"] & 3).astype(int) - 1
     t["lit"] = ((t["flags"] >> 2) & 3).astype(int) - 1
     t["noise_src"] = (t["flags"] >> 4) & 1

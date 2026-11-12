@@ -4,10 +4,11 @@
    - la page est d'abord demandée au réseau (pour les mises à jour), puis lue en cache si le réseau manque ;
    - le fond de carte OpenStreetMap et les services de recherche ne sont pas mis en cache (politique d'usage d'OSM).
    VERSION change à chaque régénération des données (mise_a_jour_06.py) : l'ancien cache est alors supprimé. */
-var VERSION = 'oncyal-2026-11-12';
-var LEAFLET = ['https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css', 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js'];
+var VERSION = 'oncyal-2026-11-12d';
+var LEAFLET = ['https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css', 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js',
+  'https://cdn.jsdelivr.net/npm/opening_hours@3.15.0/build/opening_hours.min.js'];
 var COQUILLE = ['./', 'index.html', 'manifest.webmanifest', 'favicon.svg', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png',
-  'tuiles/index.json', 'tuiles/hw.json', 'tuiles/poi.json'].concat(LEAFLET);
+  'tuiles/index.json', 'tuiles/hw.json', 'tuiles/poi.json', 'tuiles/zones.json'].concat(LEAFLET);
 
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(VERSION).then(function (c) { return c.addAll(COQUILLE); }).then(function () { return self.skipWaiting(); }));
