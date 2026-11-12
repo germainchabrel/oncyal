@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Oncyal 06 : itinéraires à vélo au calme</title>
+<meta name="description" content="Oncyal calcule un itinéraire à vélo qui évite le bruit, la pollution de l’air et la pollution lumineuse, rue par rue. Disponible dans les Alpes-Maritimes (06).">
+<meta name="theme-color" content="#08131d">
+<meta property="og:title" content="Oncyal 06">
+<meta property="og:description" content="Le chemin le plus calme à vélo : moins de bruit, moins de pollution, moins de lumière.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://oncyal.germain-chab.workers.dev/">
+<meta property="og:image" content="https://oncyal.germain-chab.workers.dev/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Oncyal 06 : un martin-pêcheur posé au bout d’une vague qui s’apaise">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Oncyal">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="preconnect" href="https://data.geopf.fr" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script>
+/* Les données démarrent leur téléchargement tout de suite, en parallèle du chargement de la carte. */
+var EARLY = { i: fetch('tuiles/index.json'), h: fetch('tuiles/hw.json') };
+EARLY.i.catch(function () {}); EARLY.h.catch(function () {});
+</script>
+<style>
+:root{color-scheme:dark;--bg:#08131d;--glass:#08131df0;--field:#0d1e2c;--line:#16293a;--line2:#21405a;--ink:#e2ebf1;--mute:#8aa0b0;--sage:#16a0e6;--kf:#f28a2e;--amber:#e3b45f;--bad:#ec8a80;--sh:0 6px 24px #000b}
+html,body{height:100%;height:100dvh;margin:0;overflow:hidden}
+body{font:14px/1.5 ui-sans-serif,'Segoe UI Variable Text','Segoe UI',system-ui,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+#map{position:fixed;inset:0;background:#0a1620}
+.card{background:var(--glass);border:1px solid var(--line);border-radius:12px;box-shadow:var(--sh);backdrop-filter:blur(6px)}
+
+/* Colonne en haut à gauche : nom, panneaux Départ et Arrivée, messages */
+#col{position:fixed;z-index:1000;top:12px;left:12px;width:360px;max-width:calc(100vw - 24px);display:flex;flex-direction:column;gap:8px;pointer-events:none}
+#col>*{pointer-events:auto}
+.brand{display:flex;align-items:center;gap:10px;padding:8px 12px;align-self:flex-start}
+.wm{margin:0;font-size:20px;font-weight:300;letter-spacing:.16em;line-height:1;white-space:nowrap}
+.wm sup{font-size:.4em;letter-spacing:.08em;margin-left:.4em;color:var(--kf);font-weight:500;vertical-align:1.1em}
+.wave{width:104px;height:24px}
+#cards{display:flex;flex-direction:column;gap:8px;transition:opacity .35s ease,transform .35s ease}
+#cards.gone{opacity:0;transform:translateY(-14px);pointer-events:none}
+.pt{padding:10px 12px 12px;position:relative}
+.pt label{display:block;font-size:12px;color:var(--mute);margin:0 0 4px;letter-spacing:.02em}
+.inp{display:flex;gap:6px;align-items:center}
+.fld{position:relative;flex:1;min-width:0}
+input[type=text]{width:100%;box-sizing:border-box;padding:9px 10px;margin:0;background:var(--field);color:var(--ink);border:1px solid var(--line);border-radius:8px;font:inherit}
+input[type=text]:focus{border-color:var(--sage);outline:none}
+.sug{position:absolute;top:100%;left:0;right:0;z-index:1200;margin:4px 0 0;padding:0;list-style:none;background:#0d2132;border:1px solid var(--line2);border-radius:8px;max-height:230px;overflow-y:auto;box-shadow:var(--sh)}
+.sug li{padding:9px 10px;cursor:pointer;font-size:.9em;border-bottom:1px solid var(--line)}
+.sug li:last-child{border-bottom:0}
+.sug li.on{background:#16314a}
+.sug li.none{color:var(--mute);cursor:default}
+.sug li small{display:block;color:var(--mute);font-size:12px;margin-top:1px}
+.swap{align-self:center;margin:-14px 0;z-index:2;width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:var(--bg);color:var(--sage);cursor:pointer;display:grid;place-items:center;padding:0;box-shadow:var(--sh)}
+.swap svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ic{flex:none;width:38px;height:38px;border:1px solid var(--line2);border-radius:8px;background:transparent;color:var(--ink);cursor:pointer;padding:0;display:grid;place-items:center}
+.ic svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.ic.on{background:var(--sage);border-color:var(--sage);color:#04121c}
+.msg{padding:9px 12px;font-size:13px;color:var(--mute)}
+.msg:empty{display:none}
+.ok{color:var(--sage)}.ko{color:var(--bad)}.wait{color:var(--amber)}
+.msg.wait::before{content:'';display:inline-block;width:.8em;height:.8em;border:2px solid var(--amber);border-right-color:transparent;border-radius:50%;margin-right:6px;vertical-align:-1px;animation:spin .8s linear infinite}
+
+.pill{padding:9px 14px;border-radius:999px;font:inherit;font-weight:600;font-size:13px;cursor:pointer;color:var(--ink);background:var(--glass);border:1px solid var(--line);box-shadow:var(--sh)}
+.pill.go{background:var(--sage);border-color:var(--sage);color:#04121c}
+.pill:focus-visible,.ic:focus-visible,.swap:focus-visible,input:focus-visible{outline:2px solid var(--sage);outline-offset:2px}
+
+/* En bas à droite : résumé du trajet, renvoi vers une application, métadonnées */
+#br{position:fixed;z-index:1000;right:12px;bottom:22px;display:flex;flex-direction:column;align-items:flex-end;gap:8px;max-width:calc(100vw - 24px)}
+#row{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
+.pill.wide{width:100%;margin-top:10px}
+#sum{padding:12px 14px;min-width:220px;animation:rise .4s ease-out both}
+#sum .km{font-size:22px;font-weight:300;letter-spacing:.02em}
+#sum .km small{font-size:13px;color:var(--mute);margin-left:6px}
+#sum .ln{display:flex;gap:9px;align-items:flex-start;margin-top:8px;font-size:13px;color:var(--ink)}
+#sum .ln svg{flex:none;width:16px;height:16px;margin-top:2px;fill:none;stroke:var(--sage);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+#sum .ln b{font-weight:600}
+#sum .ln small{display:block;font-size:11px;color:var(--mute);margin-top:1px}
+.airj,.poij{margin-top:9px;font-size:12px;color:var(--mute);display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px}
+.airj b{color:var(--ink);font-weight:600;margin-left:3px}
+.airj small{margin-left:auto;font-size:10px;opacity:.7}
+.airj i,.poij i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px;vertical-align:0}
+.poij span{white-space:nowrap}
+.sig{display:block;margin-top:8px;font-size:11px;color:var(--mute);text-decoration:underline;text-underline-offset:2px}
+.sig:hover{color:var(--sage)}
+#sum .app button+button{flex:0 0 auto;background:transparent;color:var(--ink);border-color:var(--line2)}
+.lg{margin-left:6px;background:none;border:1px solid var(--line2);border-radius:6px;color:var(--mute);font:inherit;font-size:11px;font-weight:600;padding:2px 6px;cursor:pointer}
+.lg:hover{color:var(--sage);border-color:var(--sage)}
+html[lang=en] .md .fr,html[lang=fr] .md .en{display:none}
+#sum .sc{display:flex;gap:14px;margin-top:6px;font-size:13px;color:var(--mute)}
+#sum .sc span{display:flex;align-items:center;gap:5px}
+#sum .sc b{color:var(--ink);font-weight:600}
+#sum .sc svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+#sum .app{display:flex;gap:8px;margin-top:10px}
+#sum .app button{flex:1;padding:8px 10px;border-radius:8px;font:inherit;font-weight:600;font-size:13px;cursor:pointer;background:var(--sage);border:1px solid var(--sage);color:#04121c}
+#sum .app button[aria-expanded=true]{background:transparent;color:var(--sage)}
+#sum{max-width:320px}
+.dl{margin-top:10px;max-height:min(46dvh,340px);overflow-y:auto}
+.dl .fmt{display:flex;gap:6px;margin-bottom:6px}
+.dl .fmt a{flex:1;text-align:center;text-decoration:none;padding:7px 0;border-radius:8px;font-weight:600;font-size:13px;border:1px solid var(--line2);color:var(--ink)}
+.dl .fmt a:hover{border-color:var(--sage);color:var(--sage)}
+.dl details{border-top:1px solid var(--line)}
+.dl summary{list-style:none;cursor:pointer;padding:8px 0;font-size:13px;font-weight:600;color:var(--ink);display:flex;justify-content:space-between}
+.dl summary::-webkit-details-marker{display:none}
+.dl summary::after{content:'+';color:var(--mute);font-weight:400}
+.dl details[open] summary::after{content:'–'}
+.dl p{margin:0 0 8px;font-size:12px;line-height:1.5;color:var(--mute)}
+#md{position:fixed;z-index:1100;right:12px;bottom:22px;width:380px;max-width:calc(100vw - 24px);max-height:calc(100dvh - 44px);overflow-y:auto;padding:0 18px 8px;animation:rise .3s ease-out both}
+#md .mdh{position:sticky;top:0;display:flex;align-items:center;justify-content:space-between;background:var(--bg);margin:0 -18px;padding:12px 18px 10px;border-bottom:1px solid var(--line);z-index:1}
+#md .mdh h2{margin:0;font-size:14px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
+#md .x{background:none;border:0;color:var(--mute);font-size:22px;line-height:1;cursor:pointer;padding:0 4px}
+#md details{border-bottom:1px solid var(--line)}
+#md summary{list-style:none;cursor:pointer;padding:11px 0;font-weight:600;color:var(--ink);display:flex;justify-content:space-between;align-items:center}
+#md summary::-webkit-details-marker{display:none}
+#md summary::after{content:'';width:7px;height:7px;border-right:1.5px solid var(--mute);border-bottom:1.5px solid var(--mute);transform:rotate(45deg);margin:0 4px 3px 0;transition:transform .2s}
+#md details[open] summary::after{transform:rotate(-135deg);margin-bottom:-2px}
+#md details[open] summary{color:var(--sage)}
+#md details>:last-child{margin-bottom:12px}
+#md summary:focus-visible{outline:2px solid var(--sage);outline-offset:2px}
+
+/* Métadonnées : une seule police, une seule taille, sans gras ni italique dans le texte */
+.md,.md *{font-size:13px;line-height:1.55;font-family:inherit;font-style:normal;font-weight:400;color:var(--mute)}
+.md p{margin:6px 0 0}
+.md ul{margin:6px 0 0;padding-left:18px}
+.md li{margin:5px 0}
+.md a{color:var(--sage)}
+
+/* Carte */
+.dk{filter:invert(1) hue-rotate(180deg) brightness(.85) contrast(.9)}
+.pin-i{animation:drop .35s ease-out}
+.pin-i svg{display:block}
+.leaflet-tooltip.alert{background:#2a1416;border:1px solid var(--bad);color:#ffd9d5;font:600 12px/1.3 ui-sans-serif,'Segoe UI',system-ui,sans-serif;padding:5px 9px;border-radius:8px;box-shadow:var(--sh);white-space:nowrap;animation:rise .4s ease-out both}
+.leaflet-tooltip.alert::before{display:none}
+.leaflet-control-attribution{font-size:10px}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes drop{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:none}}
+[hidden]{display:none!important}
+@media(max-width:640px){
+  #col{width:auto;right:12px}
+  #br{left:12px;align-items:stretch}
+  #row{justify-content:flex-start}
+  #row .pill{flex:1 1 auto;padding:7px 8px;font-size:12px}
+  #sum{padding:9px 11px}
+  #sum .km{font-size:18px}
+  #sum .sc{gap:10px;font-size:12px;margin-top:3px}
+  #sum .app{margin-top:7px}
+  #sum .app button{padding:6px 8px;font-size:12px}
+  .brand{padding:6px 10px}
+  .wm{font-size:17px}
+  #sum{min-width:0}
+  input[type=text]{font-size:16px}
+  .brand .wave{display:none}
+  .leaflet-control-zoom{display:none}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-sound" viewBox="0 0 24 24"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z"/><path d="M15.5 9a4 4 0 0 1 0 6"/><path d="M18 6.5a8 8 0 0 1 0 11"/></symbol>
+    <symbol id="i-air" viewBox="0 0 24 24"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/></symbol>
+    <symbol id="i-light" viewBox="0 0 24 24"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></symbol>
+    <symbol id="i-locate" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v4M12 17.5v4M2.5 12h4M17.5 12h4"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></symbol>
+    <symbol id="i-swap" viewBox="0 0 24 24"><path d="M7 4v14M7 18l-3-3M7 18l3-3M17 20V6M17 6l-3 3M17 6l3 3"/></symbol>
+  </defs>
+</svg>
+<div id="map"></div>
+
+<div id="col">
+  <div class="brand card"><h1 class="wm">oncyal<sup>06</sup></h1><button class="lg" id="lg" type="button" onclick="changerLangue()">EN</button><svg class="wave" viewBox="0 0 186 36" preserveAspectRatio="xMinYMid meet" aria-hidden="true" focusable="false">
+<defs><linearGradient id="wg" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="186" y2="0"><stop offset="0" stop-color="#16a0e6" stop-opacity="0"/><stop offset=".3" stop-color="#16a0e6" stop-opacity=".55"/><stop offset="1" stop-color="#16a0e6" stop-opacity="1"/></linearGradient></defs>
+<path d="M0.0 18.0 L1.5 22.2 L3.0 25.6 L4.5 27.7 L6.0 28.4 L7.5 27.7 L9.0 25.9 L10.5 23.2 L12.0 20.1 L13.5 17.0 L15.0 14.3 L16.5 12.2 L18.0 11.1 L19.5 11.0 L21.0 11.7 L22.5 13.2 L24.0 15.1 L25.5 17.3 L27.0 19.4 L28.5 21.1 L30.0 22.3 L31.5 22.8 L33.0 22.7 L34.5 22.0 L36.0 20.9 L37.5 19.5 L39.0 18.0 L40.5 16.7 L42.0 15.6 L43.5 14.9 L45.0 14.7 L46.5 14.9 L48.0 15.5 L49.5 16.3 L51.0 17.3 L52.5 18.3 L54.0 19.2 L55.5 19.8 L57.0 20.2 L58.5 20.2 L60.0 20.0 L61.5 19.5 L63.0 18.9 L64.5 18.2 L66.0 17.6 L67.5 17.0 L69.0 16.6 L70.5 16.5 L72.0 16.5 L73.5 16.7 L75.0 17.1 L76.5 17.5 L78.0 18.0 L79.5 18.4 L81.0 18.8 L82.5 19.0 L84.0 19.0 L85.5 19.0 L87.0 18.8 L88.5 18.5 L90.0 18.2 L91.5 17.9 L93.0 17.6 L94.5 17.4 L96.0 17.3 L97.5 17.3 L99.0 17.4 L100.5 17.5 L102.0 17.7 L103.5 17.9 L105.0 18.1 L106.5 18.3 L108.0 18.4 L109.5 18.5 L111.0 18.5 L112.5 18.4 L114.0 18.3 L115.5 18.1 L117.0 18.0 L118.5 17.9 L120.0 17.8 L121.5 17.7 L123.0 17.7 L124.5 17.7 L126.0 17.7 L127.5 17.8 L129.0 17.9 L130.5 18.0 L132.0 18.1 L133.5 18.2 L135.0 18.2 L136.5 18.2 L138.0 18.2 L139.5 18.2 L141.0 18.1 L142.5 18.0 L144.0 18.0 L145.5 17.9 L147.0 17.9 L148.5 17.8 L150.0 17.8 L151.5 17.9 L153.0 17.9 L154.5 18.0 L156.0 18.0 L157.5 18.0 L159.0 18.1" fill="none" stroke="url(#wg)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M159 18.2 L183 18.2" fill="none" stroke="#16a0e6" stroke-width="1.6" stroke-linecap="round"/><g aria-label="martin-pêcheur"><path d="M161 21.2 L164.6 15.6 L166.8 16.8 Z" fill="#0b6fa8"/><path d="M164 17.2 C164.4 12.4 167.9 9.3 172 9.4 C175.3 9.5 177.3 11.6 177.3 14 C177.3 16.5 175.1 17.6 171.6 17.7 L166 17.7 Z" fill="#16a0e6"/><path d="M167.4 12.6 C169 11.4 171.4 11 173.4 11.6 C171.6 12.2 169.6 13 167.4 12.6 Z" fill="#7fd3ff" opacity=".8"/><path d="M168 17.6 C170.6 18.2 174.6 17.6 176.6 15.2 C177 17.2 174.8 18.8 171.9 18.9 C170.3 18.9 169 18.5 168 17.6 Z" fill="#f28a2e"/><path d="M176.7 12.5 L183.6 13.5 L176.9 14.5 Z" fill="#d9e4ec"/><circle cx="174.6" cy="12.2" r=".9" fill="#04121c"/><circle cx="175.7" cy="14.9" r=".8" fill="#eaf6fc"/><path d="M170.2 18.4 v1.3 M172.4 18.4 v1.3" stroke="#f28a2e" stroke-width=".8" stroke-linecap="round"/></g></svg></div>
+  <div id="cards">
+    <div class="pt card">
+      <label for="aS" data-en="Start">Départ</label>
+      <div class="inp">
+        <div class="fld"><input id="aS" type="text" placeholder="Adresse, ville ou lieu" data-en-ph="Address, town or place" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="lS"><ul class="sug" id="lS" role="listbox" hidden></ul></div>
+        <button class="ic" id="gS" type="button" onclick="locate('start')" title="Partir de ma position" aria-label="Partir de ma position" data-en-t="Start from my location"><svg><use href="#i-locate"/></svg></button>
+        <button class="ic" id="bS" type="button" onclick="setMode('start')" title="Placer le départ sur la carte" aria-label="Placer le départ sur la carte" data-en-t="Place the start on the map"><svg><use href="#i-pin"/></svg></button>
+      </div>
+    </div>
+    <button class="swap" id="sw" type="button" onclick="swapPts()" title="Inverser départ et arrivée" aria-label="Inverser départ et arrivée" data-en-t="Swap start and destination"><svg><use href="#i-swap"/></svg></button>
+    <div class="pt card">
+      <label for="aE" data-en="Destination">Arrivée</label>
+      <div class="inp">
+        <div class="fld"><input id="aE" type="text" placeholder="Adresse, ville ou lieu" data-en-ph="Address, town or place" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="lE"><ul class="sug" id="lE" role="listbox" hidden></ul></div>
+        <button class="ic" id="gE" type="button" onclick="locate('end')" title="Arriver à ma position" aria-label="Arriver à ma position" data-en-t="End at my location"><svg><use href="#i-locate"/></svg></button>
+        <button class="ic" id="bE" type="button" onclick="setMode('end')" title="Placer l’arrivée sur la carte" aria-label="Placer l’arrivée sur la carte" data-en-t="Place the destination on the map"><svg><use href="#i-pin"/></svg></button>
+      </div>
+    </div>
+  </div>
+  <div class="msg card ko" id="gs" hidden></div>
+  <div class="msg card" id="rs" aria-live="polite"></div>
+</div>
+
+<div id="br">
+  <div id="sum" class="card" hidden></div>
+  <div id="row">
+    <button class="pill" id="edit" type="button" onclick="showCards(true)" hidden data-en="Edit">Modifier</button>
+    <button class="pill" type="button" onclick="clearAll()" data-en="Clear">Effacer</button>
+    <button class="pill" id="mdOpen" type="button" onclick="openMd(true)" aria-expanded="false" aria-controls="md" data-en="Metadata">Métadonnées</button>
+  </div>
+</div>
+
+<div id="md" class="card md" role="dialog" aria-label="Métadonnées" data-en-t="Metadata" hidden>
+  <div class="mdh"><h2 data-en="Metadata">Métadonnées</h2><button class="x" type="button" onclick="openMd(false)" aria-label="Fermer" data-en-t="Close">×</button></div>
+
+  <div class="fr">
+  <details>
+    <summary>Prolégomènes</summary>
+    <p>Oncyal est un outil d’aide au choix, en version bêta. Ne vous fiez pas à 100 % à ces données.</p>
+    <ul>
+      <li>Ce sont des modèles et des estimations, pas des mesures prises dans la rue.</li>
+      <li>Seuls le trafic routier et ferroviaire sont pris en compte pour le bruit : pas les avions, ni les chantiers, commerces ou événements.</li>
+      <li>L’état du sol et la sécurité d’un chemin ne sont pas évalués.</li>
+      <li>Éviter la lumière peut mener vers des rues sombres : choisissez selon l’heure et votre sentiment de sécurité.</li>
+      <li>Respectez la signalisation et restez attentif. Sur les voies piétonnes, roulez au pas ou poussez votre vélo.</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>Itinéraire</summary>
+    <p>Chaque rue a une durée de parcours, à vélo. Oncyal y ajoute des pénalités quand la rue est bruyante, polluée ou éclairée, puis cherche le trajet dont le total est le plus faible (algorithme A*).</p>
+    <ul>
+      <li>Le bruit et l’air sont les plus pénalisés. La lumière ne compte que la nuit, quand le soleil est couché au départ : de jour, elle ne gêne pas.</li>
+      <li>Deux pénalités s’additionnent : l’une compare chaque rue aux rues voisines, l’autre frappe toute rue au-delà de 60 dB ou parmi les plus polluées du département.</li>
+      <li>Sur 25 trajets de 1 à 8 km autour de Nice : 6 dB de moins en moyenne que le trajet le plus rapide, pour 11 % de distance en plus.</li>
+      <li>Rouge sur la carte : au-delà de 68 dB (seuil des points noirs du bruit routier) ou parmi les 15 % de rues les plus polluées du secteur. Un message signale les longs tronçons rouges.</li>
+      <li>Voies privées exclues ; sens uniques et contresens cyclables respectés ; pistes cyclables préférées. Là où le vélo est interdit mais la marche permise, la durée est comptée au pas.</li>
+      <li>Le long du trajet : fontaines, arceaux vélo, stations de réparation et magasins de cycles à moins de 40 m, d’après OpenStreetMap.</li>
+      <li>Partager : l’adresse de la page contient le départ et l’arrivée ; envoyée à quelqu’un, elle rouvre le même trajet.</li>
+      <li>Télécharger la trace : fichier GPX, KML ou GeoJSON du trajet exact, avec un mode d’emploi pour Geovelo, Google Maps, Komoot, OsmAnd, Organic Maps et les compteurs GPS.</li>
+      <li>Hors ligne : une fois le site ouvert, la page et les zones déjà consultées restent disponibles sans réseau (sauf le fond de carte et la recherche d’adresses).</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>Notes du trajet</summary>
+    <ul>
+      <li>Bruit : niveau moyen sur 24 heures (Lden, en dB). Officiel (Cerema 2022) pour les grandes routes et voies ferrées, estimé ailleurs d’après le type de voie et la proximité des grands axes. Repère de l’OMS pour le trafic routier : 53 dB. Moins de 53 dB : calme ; 53 à 60 : modéré ; 60 à 68 : bruyant ; au-delà : très bruyant.</li>
+      <li>Air : concentrations moyennes de l’année 2024 modélisées par AtmoSud à 25 m, en µg/m³. Repères annuels de l’OMS (2021) : 10 µg/m³ pour le dioxyde d’azote (NO₂), 5 µg/m³ pour les particules fines (PM2,5). En ville, ces repères sont presque partout dépassés : la comparaison entre trajets reste parlante.</li>
+      <li>Lumière : note de 0 (rue sombre) à 100 (très éclairée), mêlant satellite NASA (précision d’environ 500 m) et éclairage public OpenStreetMap, et part des rues déclarées éclairées. Une rue sans information est comptée non éclairée.</li>
+      <li>Air aujourd’hui : indice ATMO du jour dans la commune de départ, publié par AtmoSud (Bon, Moyen, Dégradé, Mauvais, Très mauvais, Extrêmement mauvais). En cas d’épisode, un avertissement s’affiche.</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>Données et sources</summary>
+    <ul>
+      <li>Bruit : Cerema, cartes de bruit stratégiques 2022.</li>
+      <li>Air : AtmoSud, modélisation 2024 ; indice du jour : API publique AtmoSud.</li>
+      <li>Lumière : NASA VIIRS Black Marble et OpenStreetMap.</li>
+      <li>Routes, accès, points utiles et fond de carte : © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">contributeurs OpenStreetMap</a>, licence ODbL, octobre 2026.</li>
+      <li>Adresses : Base Adresse Nationale et IGN (Géoplateforme). Lieux et enseignes : Photon (komoot). Communes : geo.api.gouv.fr.</li>
+      <li>Une rue refaite, fermée ou aménagée depuis peut avoir changé. Une erreur sur la carte ? Le lien Signaler une erreur ouvre une note OpenStreetMap à l’endroit du trajet.</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>Vie privée</summary>
+    <ul>
+      <li>Votre position reste dans votre navigateur.</li>
+      <li>Ce que vous tapez dans Départ et Arrivée est envoyé à l’IGN et à Photon (komoot) pour proposer des lieux, avec un point de référence pour les classer par proximité.</li>
+      <li>Pour l’air du jour, le point de départ arrondi à environ 100 m est envoyé à geo.api.gouv.fr pour trouver la commune, puis le code de la commune à AtmoSud.</li>
+      <li>Le lien de partage contient les coordonnées du départ et de l’arrivée : ne le partagez qu’avec des personnes de confiance si l’un des points est votre domicile.</li>
+      <li>Les fichiers de trace sont créés dans votre navigateur : rien n’est envoyé.</li>
+      <li class="cfwa" hidden>Mesure d’audience anonyme, sans cookie : Cloudflare Web Analytics.</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>Mentions légales et licences</summary>
+    <ul>
+      <li>Éditeur : particulier, à titre non professionnel. Conformément à l’article 6 de la loi pour la confiance dans l’économie numérique (LCEN), son identité est communiquée à l’hébergeur.</li>
+      <li>Hébergeur : Cloudflare, Inc., 101 Townsend Street, San Francisco, CA 94107, États-Unis.</li>
+      <li>Données du site (dossier tuiles) : base de données dérivée d’OpenStreetMap, mise à disposition sous licence <a href="https://opendatacommons.org/licenses/odbl/1-0/" target="_blank" rel="noopener">ODbL 1.0</a>, © contributeurs OpenStreetMap, avec des données du Cerema, d’AtmoSud et de la NASA.</li>
+      <li>Données AtmoSud (modélisation 2024 et indice du jour) : réutilisées avec mention de la source ; conditions de réutilisation en cours de confirmation auprès d’AtmoSud.</li>
+      <li>Fond de carte : tuiles OpenStreetMap, selon leur politique d’usage.</li>
+    </ul>
+  </details>
+  </div>
+
+  <div class="en">
+  <details>
+    <summary>Disclaimer</summary>
+    <p>Oncyal is a decision aid, in beta. Do not rely on this data 100 %.</p>
+    <ul>
+      <li>These are models and estimates, not street measurements.</li>
+      <li>Only road and rail traffic are counted for noise: not aircraft, building works, shops or events.</li>
+      <li>Surface condition and path safety are not assessed.</li>
+      <li>Avoiding light can lead to dark streets: choose according to the time and how safe you feel.</li>
+      <li>Follow road signs and stay alert. On pedestrian ways, ride at walking pace or push your bike.</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>Route</summary>
+    <p>Each street has a cycling time. Oncyal adds penalties when a street is noisy, polluted or brightly lit, then looks for the route with the lowest total (A* algorithm).</p>
+    <ul>
+      <li>Noise and air pollution weigh the most. Light only counts at night, when the sun has set at the start point: in daylight it is no nuisance.</li>
+      <li>Two penalties add up: one compares each street with nearby streets, the other hits any street above 60 dB or among the most polluted in the department.</li>
+      <li>On 25 routes of 1 to 8 km around Nice: 6 dB quieter on average than the fastest route, for 11 % more distance.</li>
+      <li>Red on the map: above 68 dB (French threshold for road noise black spots) or among the 15 % most polluted streets nearby. A label flags long red sections.</li>
+      <li>Private roads excluded; one-way streets and contraflow bike lanes respected; cycle paths preferred. Where cycling is forbidden but walking allowed, time is counted at walking pace.</li>
+      <li>Along the route: drinking water, bike parking, repair stations and bike shops within 40 m, from OpenStreetMap.</li>
+      <li>Share: the page address holds the start and destination; sent to someone, it reopens the same route.</li>
+      <li>Download the track: GPX, KML or GeoJSON file of the exact route, with instructions for Geovelo, Google Maps, Komoot, OsmAnd, Organic Maps and GPS bike computers.</li>
+      <li>Offline: once the site has been opened, the page and the areas already viewed stay available without a connection (except the base map and address search).</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>Route scores</summary>
+    <ul>
+      <li>Noise: 24-hour average level (Lden, in dB). Official (Cerema 2022) for major roads and railways, estimated elsewhere from the road type and the distance to major roads. WHO guideline for road traffic: 53 dB. Below 53 dB: quiet; 53 to 60: moderate; 60 to 68: noisy; above: very noisy.</li>
+      <li>Air: 2024 annual average concentrations modelled by AtmoSud at 25 m, in µg/m³. WHO annual guidelines (2021): 10 µg/m³ for nitrogen dioxide (NO₂), 5 µg/m³ for fine particles (PM2.5). In towns these guidelines are exceeded almost everywhere: comparing routes is still meaningful.</li>
+      <li>Light: score from 0 (dark street) to 100 (brightly lit), combining NASA satellite data (about 500 m precision) and OpenStreetMap street lighting, plus the share of streets tagged as lit. Streets with no information count as unlit.</li>
+      <li>Air today: today’s ATMO index in the start municipality, published by AtmoSud (Good, Fair, Degraded, Poor, Very poor, Extremely poor). During a pollution episode, a warning is shown.</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>Data and sources</summary>
+    <ul>
+      <li>Noise: Cerema, strategic noise maps 2022.</li>
+      <li>Air: AtmoSud, 2024 modelling; today’s index: AtmoSud public API.</li>
+      <li>Light: NASA VIIRS Black Marble and OpenStreetMap.</li>
+      <li>Roads, access, points of interest and base map: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>, ODbL licence, October 2026.</li>
+      <li>Addresses: Base Adresse Nationale and IGN (Géoplateforme). Places and shops: Photon (komoot). Municipalities: geo.api.gouv.fr.</li>
+      <li>A street rebuilt, closed or redesigned since then may have changed. A map error? The Report a map error link opens an OpenStreetMap note on the route.</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>Privacy</summary>
+    <ul>
+      <li>Your location stays in your browser.</li>
+      <li>What you type in Start and Destination is sent to IGN and Photon (komoot) to suggest places, with a reference point to sort them by distance.</li>
+      <li>For today’s air quality, the start point rounded to about 100 m is sent to geo.api.gouv.fr to find the municipality, then the municipality code to AtmoSud.</li>
+      <li>The share link contains the start and destination coordinates: only share it with people you trust if one of the points is your home.</li>
+      <li>Track files are created in your browser: nothing is sent.</li>
+      <li class="cfwa" hidden>Anonymous, cookie-free audience measurement: Cloudflare Web Analytics.</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>Legal notice and licences</summary>
+    <ul>
+      <li>Publisher: private individual, non-professional. In accordance with article 6 of the French LCEN law, their identity has been provided to the host.</li>
+      <li>Host: Cloudflare, Inc., 101 Townsend Street, San Francisco, CA 94107, United States.</li>
+      <li>Site data (tiles folder): database derived from OpenStreetMap, made available under the <a href="https://opendatacommons.org/licenses/odbl/1-0/" target="_blank" rel="noopener">ODbL 1.0</a> licence, © OpenStreetMap contributors, with data from Cerema, AtmoSud and NASA.</li>
+      <li>AtmoSud data (2024 modelling and today’s index): reused with attribution; reuse terms being confirmed with AtmoSud.</li>
+      <li>Base map: OpenStreetMap tiles, under their usage policy.</li>
+    </ul>
+  </details>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+
+/* Les fichiers de données sont lus dans le dossier « tuiles » placé à côté de cette page.
+   Il contient index.json, hw.json et les fichiers x_y.bin produits par decoupe_06.py. */
+var DATA = 'tuiles/';
+/* Langue : français par défaut ; anglais si le navigateur n'est pas en français, ou au choix (bouton FR / EN). */
+var LANG = (function () { try { var l = localStorage.getItem('oncyal_lang'); if (l === 'fr' || l === 'en') return l; } catch (e) {} return /^fr/i.test(navigator.language || 'fr') ? 'fr' : 'en'; })();
+function T(fr, en) { return LANG === 'en' ? en : fr; }
+function fmt(v, d) { return LANG === 'en' ? v.toFixed(d) : v.toFixed(d).replace('.', ','); }
+function $(i) { return document.getElementById(i); }
+function cl(x, a, b) { return Math.max(a, Math.min(b, x)); }
+function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+function fr(v, d) { return isFinite(v) ? v.toFixed(d == null ? 1 : d).replace('.', ',') : '—'; }
+function say(c, t) { var s = $('rs'); s.className = 'msg card ' + c; s.textContent = String(t).replace(/^(⏳|🟢|🔴) /, ''); }
+
+/* ---------- Carte et fonds ---------- */
+var map = L.map('map', { zoomControl: false }).setView([43.95, 7.1], 9);
+L.control.zoom({ position: 'bottomleft' }).addTo(map);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, className: 'dk', attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">contributeurs OpenStreetMap</a>' }).addTo(map);
+var COV = null;
+
+/* ---------- Données : index, types de voies, lecture d'une zone ---------- */
+var IDX = {}, HWL = [], TS = [0.05, 0.04], TC = {}, G = null, LAT0 = 43.6, K = 0.3, runId = 0, pts = { start: null, end: null }, mk = {}, mode = null, routes = [];
+var DEF = '';
+var ready = Promise.all([
+  EARLY.i.then(function (r) { if (!r.ok) throw new Error('index.json absent'); return r.json(); }),
+  EARLY.h.then(function (r) { if (!r.ok) throw new Error('hw.json absent'); return r.json(); })
+]).then(function (r) {
+  TS = [r[0].ts_lon, r[0].ts_lat]; r[0].tuiles.forEach(function (t) { IDX[t.x + '_' + t.y] = t; }); HWL = r[1];
+  var xs = r[0].tuiles.map(function (t) { return t.x; }), ys = r[0].tuiles.map(function (t) { return t.y; });
+  COV = L.latLngBounds([Math.min.apply(null, ys) * TS[1], Math.min.apply(null, xs) * TS[0]], [(Math.max.apply(null, ys) + 1) * TS[1], (Math.max.apply(null, xs) + 1) * TS[0]]);
+  map.fitBounds(COV, { padding: [10, 10], animate: false });
+}).catch(function (e) {
+  var s = $('gs'); s.hidden = false; s.textContent = T('Les données n’ont pas pu être chargées (' + e.message + '). Rechargez la page.', 'The data could not be loaded (' + e.message + '). Please reload the page.');
+});
+function tkeys(bb) {
+  var r = [], x0 = Math.floor(bb.getWest() / TS[0]), x1 = Math.floor(bb.getEast() / TS[0]), y0 = Math.floor(bb.getSouth() / TS[1]), y1 = Math.floor(bb.getNorth() / TS[1]);
+  for (var x = x0; x <= x1; x++) for (var y = y0; y <= y1; y++) r.push(x + '_' + y);
+  return r;
+}
+function parse(buf) {
+  var dv = new DataView(buf);
+  if (String.fromCharCode(dv.getUint8(0), dv.getUint8(1), dv.getUint8(2), dv.getUint8(3)) !== 'CC01') throw new Error('fichier invalide');
+  var n = dv.getUint32(4, true), m = dv.getUint32(8, true), p = 12, t = { n: n, m: m };
+  function arr(C, k) { var a = new C(buf.slice(p, p + k * C.BYTES_PER_ELEMENT)); p += k * C.BYTES_PER_ELEMENT; return a; }
+  t.id = arr(Float64Array, n); t.lon = arr(Int32Array, n); t.lat = arr(Int32Array, n);
+  t.a = arr(Uint32Array, m); t.b = arr(Uint32Array, m); t.len = arr(Uint16Array, m); t.hw = arr(Uint8Array, m); t.fl = arr(Uint8Array, m);
+  ['noise', 'no2', 'pm10', 'pm25', 'ica', 'lum'].forEach(function (k) { t[k] = arr(Uint8Array, m); });
+  if (p + m <= buf.byteLength) t.acc = arr(Uint8Array, m);   // règles d'accès OSM (acces_06.py)
+  t.mx = new Float64Array(n); t.my = new Float64Array(n);
+  for (var i = 0; i < n; i++) { var r = t.lat[i] / 1e6 * Math.PI / 180; t.mx[i] = (t.lon[i] / 1e6 + 180) / 360; t.my[i] = (1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2; }
+  return t;
+}
+/* Les tuiles sont écrites en gzip (Cloudflare ne compresse pas les fichiers binaires) : décompression dans le navigateur. */
+function degz(buf) {
+  var u = new Uint8Array(buf, 0, 2); if (u[0] !== 0x1f || u[1] !== 0x8b) return Promise.resolve(buf);
+  return new Response(new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
+}
+function load(k) {
+  if (!IDX[k]) return Promise.resolve(null);
+  return TC[k] || (TC[k] = fetch(DATA + k + '.bin').then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.arrayBuffer(); }).then(degz).then(parse).catch(function (e) { delete TC[k]; throw e; }));
+}
+async function pool(items, n, fn) { var i = 0; await Promise.all(Array.from({ length: Math.min(n, items.length) }, async function () { while (i < items.length) await fn(items[i++]); })); }
+
+/* ---------- Notes d'un bout de rue (0 = parfait, 1 = pire) ---------- */
+function sc(t, i) {
+  var o = t.noise[i], db = o === 255 ? NaN : o / 4 + 30, n = isNaN(db) ? 0 : cl((db - 50) / 25, 0, 1);
+  var ic = t.ica[i], no = t.no2[i];
+  var a = ic !== 255 ? cl((ic / 10 - 2.7) / 3.3, 0, 1) : no !== 255 ? cl((no / 2 - 5) / 30, 0, 1) : 0.35;
+  // Éclairage public : non renseigné dans OSM = compté comme non éclairé (0).
+  var lu = t.lum[i], lit = Math.max(0, ((t.fl[i] >> 2) & 3) - 1), sat = lu === 255 ? null : cl(lu / 254 / 0.45, 0, 1), l;
+  l = sat === null ? lit : 0.65 * sat + 0.35 * lit;
+  return { db: db, n: n, a: a, l: l };
+}
+
+var hl = L.layerGroup().addTo(map);
+
+/* ---------- Réseau et calcul d'itinéraire ----------
+   Moteur sur le modèle d'OSRM, GraphHopper et Valhalla, exécuté dans le navigateur :
+   - règles d'accès OSM par mode : voies et barrières privées ou interdites exclues (acces_06.py) ;
+   - sens uniques propres au vélo : contresens cyclables, ronds-points, oneway:bicycle ;
+   - priorités vélo : pistes et bandes préférées, grands axes sans aménagement pénalisés ;
+   - graphe compact (tableaux d'adjacence CSR) et recherche A* avec heuristique admissible ;
+   - départ et arrivée accrochés au point le plus proche sur la rue (nœuds virtuels), pas au carrefour le plus proche. */
+var SP = { primary: [4.2, 1.3], secondary: [4.4, 1.3], tertiary: [4.6, 1.35], unclassified: [4.6, 1.35], residential: [4.6, 1.4], living_street: [4.2, 1.4], service: [3.8, 1.4], pedestrian: [2.2, 1.4], cycleway: [5.2, 1.4], footway: [2.4, 1.4], path: [2.8, 1.2], track: [3.4, 1.3], bridleway: [2.6, 1.2], steps: [0.6, 0.7] };
+var HWN = Object.keys(SP), HWI = {}; HWN.forEach(function (h, i) { HWI[h] = i; });
+var PATHY = { footway: 1, path: 1, track: 1, bridleway: 1, steps: 1, pedestrian: 1 }, BC = ['#1dd1a1', '#feca57', '#ff6b6b'], GW = [1, 1, 1];
+var MAXD = 25000;   // distance maximale à vol d'oiseau (m)
+/* Pénalités (multiplient la durée de parcours d'une rue) :
+   - relatives : rue comparée aux rues de la zone (0 = parmi les 10 % les plus calmes, 1 = parmi les 10 % les plus exposées) ;
+   - absolues : rue réellement bruyante (au-delà de 60 dB) ou très polluée, quel que soit le quartier.
+   Bruit et air pèsent fort, la lumière moins (mais un peu).
+   Réglage testé sur 25 trajets de 1 à 8 km autour de Nice : −6 dB en moyenne pour +11 % de distance (+27 % au pire).
+   La pénalité absolue sur l'air ne joue qu'au-delà de 0,92 : en ville, l'air est noté élevé presque partout,
+   et une pénalité uniforme découragerait tout détour sans rien éviter. */
+var PEN = { rel: { n: 25, a: 20, l: 6 }, abs: { n: 25, a: 4 } };
+function penalite(rn, ra, rl, db, a, nuit) {
+  return 1 + PEN.rel.n * rn + PEN.rel.a * ra + (nuit ? PEN.rel.l * rl : 0)
+    + PEN.abs.n * cl(((isNaN(db) ? 40 : db) - 60) / 15, 0, 1) + PEN.abs.a * cl((a - 0.92) / 0.08, 0, 1);
+}
+/* Nuisances franches d'une rue (couleur rouge et messages) ; la lumière, nuisance moindre, n'y entre pas.
+   Bruit : 68 dB(A) Lden, seuil réglementaire des « points noirs du bruit » routier.
+   Air : parmi les 15 % de rues les plus polluées du secteur, et note élevée dans le département. */
+/* La pollution lumineuse ne gêne qu'une fois le soleil couché : de jour, elle n'entre pas dans le calcul.
+   Hauteur du soleil d'après la date et le lieu (formules de l'éphéméride simplifiée, précision ~1 min). */
+function hauteurSoleil(lat, lng, d) {
+  var r = Math.PI / 180, j = d.getTime() / 86400000 - 10957.5, M = r * (357.5291 + 0.98560028 * j);
+  var Lm = M + r * (1.9148 * Math.sin(M) + 0.02 * Math.sin(2 * M) + 0.0003 * Math.sin(3 * M)) + r * 102.9372 + Math.PI, e = r * 23.4397;
+  var dec = Math.asin(Math.sin(e) * Math.sin(Lm)), ra = Math.atan2(Math.sin(Lm) * Math.cos(e), Math.cos(Lm)), H = r * (280.16 + 360.9856235 * j) + r * lng - ra;
+  return Math.asin(Math.sin(r * lat) * Math.sin(dec) + Math.cos(r * lat) * Math.cos(dec) * Math.cos(H)) / r;
+}
+function estNuit(ll) { return hauteurSoleil(ll.lat, ll.lng, new Date()) < -0.833; }
+var NUIT = false;
+function majPen(g, nuit) { for (var j = 0; j < g.M; j++) g.pen[j] = penalite(g.rn[j], g.ra[j], g.rl[j], g.db[j], g.a[j], nuit); g.nuit = nuit; }
+function tropBruit(rn, db) { return db >= 68; }
+function tropAir(ra, a) { return ra >= 0.85 && a >= 0.7; }
+function xy(lat, lng) { return [lng * Math.cos(LAT0 * Math.PI / 180) * 111320, lat * 110540]; }
+function buildGraph(ts) {
+  var idx = new Map(), nlon = [], nlat = [], M = 0, k = 0;
+  ts.forEach(function (t) { if (t) M += t.m; });
+  var eu = new Int32Array(M), ev = new Int32Array(M), len = new Float32Array(M), hw = new Uint8Array(M), acc = new Uint8Array(M),
+      en = new Float32Array(M), ea = new Float32Array(M), el = new Float32Array(M), edb = new Float32Array(M),
+      no2 = new Float32Array(M), pm25 = new Float32Array(M), lit = new Uint8Array(M);
+  ts.forEach(function (t) {
+    if (!t) return; var mp = new Int32Array(t.n), i;
+    for (i = 0; i < t.n; i++) { var g = idx.get(t.id[i]); if (g === undefined) { g = nlon.length; idx.set(t.id[i], g); nlon.push(t.lon[i] / 1e6); nlat.push(t.lat[i] / 1e6); } mp[i] = g; }
+    for (i = 0; i < t.m; i++) {
+      var h = HWI[(HWL[t.hw[i]] || '').replace('_link', '')]; if (h === undefined) continue;
+      var c = sc(t, i), ow = PATHY[HWN[h]] ? 0 : (t.fl[i] & 3) - 1;
+      eu[k] = mp[t.a[i]]; ev[k] = mp[t.b[i]]; len[k] = t.len[i] / 10; hw[k] = h;
+      acc[k] = t.acc ? t.acc[i] : (ow + 1) << 2;      // anciennes tuiles : sens unique général, aucun accès interdit connu
+      en[k] = c.n; ea[k] = c.a; el[k] = c.l; edb[k] = c.db;
+      no2[k] = t.no2[i] === 255 ? NaN : t.no2[i] / 2; pm25[k] = t.pm25[i] === 255 ? NaN : t.pm25[i] / 2; lit[k] = ((t.fl[i] >> 2) & 3) === 2 ? 1 : 0;
+      k++;
+    }
+  });
+  var rn = contraste(en, len, k), ra = contraste(ea, len, k), rl = contraste(el, len, k);
+  var g = { N: nlon.length, M: k, eu: eu, ev: ev, len: len, hw: hw, acc: acc, n: en, a: ea, l: el, db: edb, rn: rn, ra: ra, rl: rl, pen: new Float32Array(k), no2: no2, pm25: pm25, lit: lit, nlon: nlon, nlat: nlat, A: {} };
+  majPen(g, NUIT); return g;
+}
+/* Gêne relative, utilisée pour le calcul : 0 pour les rues parmi les 10 % les moins exposées de la zone chargée,
+   1 pour les 10 % les plus exposées (centiles pondérés par la longueur). Une nuisance présente partout
+   (lumière ou air en centre-ville) ne pénalise donc plus chaque mètre : seuls les écarts entre rues comptent,
+   et ajouter un critère ne peut plus « noyer » les autres. */
+function contraste(v, len, M) {
+  var B = 1000, hist = new Float64Array(B + 1), tot = 0, i;
+  for (i = 0; i < M; i++) { hist[Math.round(cl(v[i], 0, 1) * B)] += len[i]; tot += len[i]; }
+  function q(f) { var s = 0, c = f * tot; for (var j = 0; j <= B; j++) { s += hist[j]; if (s >= c) return j / B; } return 1; }
+  var lo = q(0.1), hi = Math.max(q(0.9), lo + 0.05), r = new Float32Array(M);
+  for (i = 0; i < M; i++) r[i] = cl((v[i] - lo) / (hi - lo), 0, 1);
+  return r;
+}
+function bikePrio(h, a) {
+  if (h === 'cycleway' || (a & 16)) return 0.8;          // piste cyclable, ou vélo explicitement autorisé
+  if (a & 32) return 0.9;                                // bande ou piste le long de la chaussée
+  return h === 'primary' ? 1.5 : h === 'secondary' ? 1.3 : h === 'tertiary' ? 1.1 : 1;
+}
+function adjFor(prof, paths) {
+  var key = prof + paths; if (G.A[key]) return G.A[key];
+  var N = G.N, M = G.M, bike = prof === 'bike', deg = new Int32Array(N), par = new Int32Array(N), mark = new Uint8Array(N), i, e, j;
+  var dir = new Uint8Array(M), tt = new Float32Array(M), cf = new Float32Array(M), vmax = 0.1;
+  for (i = 0; i < N; i++) par[i] = i;
+  function f(x) { while (par[x] !== x) { par[x] = par[par[x]]; x = par[x]; } return x; }
+  for (e = 0; e < M; e++) {
+    var h = HWN[G.hw[e]], a = G.acc[e], d, sp, pr = 1;
+    if (bike) {
+      if ((a & 2) && (!PATHY[h] || (a & 1))) continue;   // privé, ou route interdite aux vélos
+      if (h === 'steps') { d = 3; sp = SP.steps[0]; }    // escalier : vélo poussé, dans les deux sens
+      else if (a & 2) { d = 3; sp = SP[h][1]; }          // voie piétonne interdite au vélo roulé (bicycle=no) : vélo poussé, au pas
+      else {
+        if (PATHY[h] && !paths && !(a & 16)) continue;
+        var o = ((a >> 2) & 3) - 1; d = o === 1 ? 1 : o === -1 ? 2 : 3; sp = SP[h][0]; pr = bikePrio(h, a);
+      }
+    } else { if (a & 1) continue; d = 3; sp = SP[h][1]; }   // interdit aux piétons (privé, foot=no...)
+    dir[e] = d; tt[e] = G.len[e] / sp; cf[e] = tt[e] * pr;
+    if (cf[e] > 0 && G.len[e] / cf[e] > vmax) vmax = G.len[e] / cf[e];
+    if (d & 1) deg[G.eu[e]]++; if (d & 2) deg[G.ev[e]]++;
+    mark[G.eu[e]] = mark[G.ev[e]] = 1; par[f(G.eu[e])] = f(G.ev[e]);
+  }
+  var off = new Int32Array(N + 1); for (i = 0; i < N; i++) off[i + 1] = off[i] + deg[i];
+  var pos = off.slice(0, N), head = new Int32Array(off[N]), aed = new Int32Array(off[N]);
+  for (e = 0; e < M; e++) {
+    if (dir[e] & 1) { j = pos[G.eu[e]]++; head[j] = G.ev[e]; aed[j] = e; }
+    if (dir[e] & 2) { j = pos[G.ev[e]]++; head[j] = G.eu[e]; aed[j] = e; }
+  }
+  var cnt = new Int32Array(N), best = -1, bc = 0;
+  for (i = 0; i < N; i++) if (mark[i]) { var r = f(i); if (++cnt[r] > bc) { bc = cnt[r]; best = r; } }
+  return (G.A[key] = { off: off, head: head, aed: aed, dir: dir, tt: tt, cf: cf, vmax: vmax, ok: function (i) { return mark[i] && f(i) === best; } });
+}
+/* Point le plus proche sur une rue praticable (du plus grand réseau connexe) : arête + position 0..1 le long de l'arête. */
+function snapEdge(ll, A) {
+  var p = xy(ll.lat, ll.lng), X = G.xy, be = -1, bd = Infinity, bt = 0;
+  for (var e = 0; e < G.M; e++) {
+    if (!A.dir[e]) continue; var u = G.eu[e], v = G.ev[e];
+    var ax = p[0] - X[2 * u], ay = p[1] - X[2 * u + 1], dx = X[2 * v] - X[2 * u], dy = X[2 * v + 1] - X[2 * u + 1];
+    if ((ax < -600 && ax - dx < -600) || (ax > 600 && ax - dx > 600) || (ay < -600 && ay - dy < -600) || (ay > 600 && ay - dy > 600)) continue;
+    var l2 = dx * dx + dy * dy, t = l2 ? cl((ax * dx + ay * dy) / l2, 0, 1) : 0, qx = ax - t * dx, qy = ay - t * dy, d = qx * qx + qy * qy;
+    if (d < bd && A.ok(u)) { bd = d; be = e; bt = t; }
+  }
+  return be < 0 ? null : { e: be, t: bt, d: Math.sqrt(bd) };
+}
+function ptOn(e, t) { var u = G.eu[e], v = G.ev[e]; return [G.nlat[u] + t * (G.nlat[v] - G.nlat[u]), G.nlon[u] + t * (G.nlon[v] - G.nlon[u])]; }
+/* File de priorité binaire sur tableaux typés. */
+function Heap() { this.k = new Float64Array(1024); this.v = new Int32Array(1024); this.n = 0; }
+Heap.prototype.push = function (d, x) {
+  if (this.n === this.k.length) { var k2 = new Float64Array(this.n * 2), v2 = new Int32Array(this.n * 2); k2.set(this.k); v2.set(this.v); this.k = k2; this.v = v2; }
+  var K_ = this.k, V = this.v, i = this.n++;
+  while (i > 0) { var p = (i - 1) >> 1; if (K_[p] <= d) break; K_[i] = K_[p]; V[i] = V[p]; i = p; }
+  K_[i] = d; V[i] = x;
+};
+Heap.prototype.pop = function () {
+  var K_ = this.k, V = this.v, top = V[0]; this.top = K_[0]; var n = --this.n; if (!n) return top;
+  var d = K_[n], x = V[n], i = 0;
+  while (true) { var l = 2 * i + 1; if (l >= n) break; if (l + 1 < n && K_[l + 1] < K_[l]) l++; if (K_[l] >= d) break; K_[i] = K_[l]; V[i] = V[l]; i = l; }
+  K_[i] = d; V[i] = x; return top;
+};
+/* A* entre deux points accrochés (nœuds virtuels S = N, T = N + 1). Coût = temps × priorité vélo × pénalité de la rue. */
+function astar(A, sa, ta, pe, ban, np, maxC) {
+  pe = pe || G.pen;
+  var GN = G.N, S = GN, T = GN + 1, NN = GN + 2, D = new Float64Array(NN).fill(Infinity), PN = new Int32Array(NN).fill(-1), PA = new Int32Array(NN), H = new Heap(), X = G.xy;
+  var EX = [], XA = {};
+  function ex(from, to, e, a, b) { (XA[from] = XA[from] || []).push(EX.length); EX.push({ to: to, e: e, a: a, b: b }); }
+  var es = sa.e, et = ta.e, ds = A.dir[es], dt = A.dir[et];
+  if (ds & 1) ex(S, G.ev[es], es, sa.t, 1); if (ds & 2) ex(S, G.eu[es], es, sa.t, 0);
+  if (dt & 1) ex(G.eu[et], T, et, 0, ta.t); if (dt & 2) ex(G.ev[et], T, et, 1, ta.t);
+  if (es === et && ((ta.t >= sa.t && (ds & 1)) || (ta.t <= sa.t && (ds & 2)))) ex(S, T, es, sa.t, ta.t);
+  var ps = xy.apply(null, ptOn(es, sa.t)), pt = xy.apply(null, ptOn(et, ta.t)); X[2 * S] = ps[0]; X[2 * S + 1] = ps[1]; X[2 * T] = pt[0]; X[2 * T + 1] = pt[1];
+  var tx = pt[0], ty = pt[1], vm = A.vmax / 0.99, off = A.off, head = A.head, aed = A.aed, cf = A.cf;
+  function h(x) { var dx = X[2 * x] - tx, dy = X[2 * x + 1] - ty; return Math.sqrt(dx * dx + dy * dy) / vm; }
+  function relax(v, c, arc, u) {
+    if (v < GN) { if (ban && ban[v]) return; if (np) c += np[v]; }
+    if (c < D[v]) { D[v] = c; PN[v] = u; PA[v] = arc; H.push(c + h(v), v); }
+  }
+  D[S] = 0; H.push(h(S), S);
+  while (H.n) {
+    var u = H.pop(), du = D[u]; if (u === T) break; if (H.top > du + h(u) + 1e-6) continue; if (maxC && H.top > maxC) break;
+    if (u < GN) for (var j = off[u]; j < off[u + 1]; j++) { var e = aed[j]; relax(head[j], du + cf[e] * pe[e], j, u); }
+    var xl = XA[u];
+    if (xl) for (var q = 0; q < xl.length; q++) { var z = EX[xl[q]], e2 = z.e; relax(z.to, du + cf[e2] * Math.abs(z.b - z.a) * pe[e2], -2 - xl[q], u); }
+  }
+  if (D[T] === Infinity) return null;
+  var steps = [], v = T;
+  while (v !== S) {
+    var arc = PA[v], u2 = PN[v];
+    if (arc >= 0) { var e3 = aed[arc]; steps.push({ e: e3, f: 1, p0: [G.nlat[u2], G.nlon[u2]], p1: [G.nlat[v], G.nlon[v]], t: A.tt[e3], n: v }); }
+    else { var z2 = EX[-2 - arc], fr_ = Math.abs(z2.b - z2.a); steps.push({ e: z2.e, f: fr_, p0: ptOn(z2.e, z2.a), p1: ptOn(z2.e, z2.b), t: A.tt[z2.e] * fr_, n: v < GN ? v : -1 }); }
+    v = u2;
+  }
+  return steps.reverse();
+}
+function metrics(steps) {
+  var m = { len: 0, t: 0, n: 0, a: 0, l: 0, db: 0, no2: 0, lno2: 0, pm25: 0, lpm: 0, ecl: 0, runs: [] }, cur = null;
+  steps.forEach(function (st) {
+    var e = st.e, d = G.len[e] * st.f, n = G.n[e], a = G.a[e], l = G.l[e], db = G.db[e], rn = G.rn[e], ra = G.ra[e];
+    // couleur : rouge si la rue est franchement bruyante ou polluée, jaune si elle l'est moyennement, vert sinon
+    var tb = tropBruit(rn, db), ta = tropAir(ra, a), band = tb || ta ? 2 : (db >= 62 || Math.max(rn, ra) >= 0.5) ? 1 : 0;
+    m.len += d; m.t += st.t; m.n += d * n; m.a += d * a; m.l += d * l; m.db += d * (isNaN(db) ? 40 : Math.max(db, 40));
+    var v2 = G.no2[e], v25 = G.pm25[e]; if (!isNaN(v2)) { m.no2 += d * v2; m.lno2 += d; } if (!isNaN(v25)) { m.pm25 += d * v25; m.lpm += d; } if (G.lit[e]) m.ecl += d;
+    if (!cur || cur.b !== band) { cur = { b: band, ll: [st.p0], len: 0, lb: 0, la: 0 }; m.runs.push(cur); }
+    cur.ll.push(st.p1); cur.len += d; if (tb) cur.lb += d; if (ta) cur.la += d;
+  });
+  if (m.len > 0) ['n', 'a', 'l', 'db', 'ecl'].forEach(function (k) { m[k] /= m.len; });
+  m.no2 = m.lno2 ? m.no2 / m.lno2 : NaN; m.pm25 = m.lpm ? m.pm25 / m.lpm : NaN;
+  return m;
+}
+/* Charge les zones de données couvrant bb et prépare le réseau (graphe + coordonnées locales). false si un calcul plus récent a pris la main. */
+async function loadNet(bb, run) {
+  var keys = tkeys(bb).filter(function (k) { return IDX[k]; });
+  if (!keys.length) throw new Error(T('hors de la zone couverte (Alpes-Maritimes pour l’instant).', 'outside the covered area (Alpes-Maritimes for now).'));
+  var n = 0, ts = []; say('wait', T('Chargement des données : 0/', 'Loading data: 0/') + keys.length);
+  await pool(keys, 6, async function (k) { ts.push(await load(k)); say('wait', T('Chargement des données : ', 'Loading data: ') + (++n) + '/' + keys.length); });
+  if (run !== runId) return false;
+  var gk = keys.slice().sort().join('|');
+  if (!G || G.k !== gk) { say('wait', T('Préparation du réseau…', 'Preparing the network…')); await sleep(20); G = buildGraph(ts); G.k = gk; }
+  if (G.nuit !== NUIT) majPen(G, NUIT);
+  var N = G.N, X = new Float64Array((N + 2) * 2), cx = Math.cos(LAT0 * Math.PI / 180) * 111320;
+  for (var i = 0; i < N; i++) { X[2 * i] = G.nlon[i] * cx; X[2 * i + 1] = G.nlat[i] * 110540; } G.xy = X;
+  return true;
+}
+async function computeRoute() {
+  if (!pts.start || !pts.end) return say('ko', T('Indiquez d’abord un départ et une arrivée.', 'Set a start and a destination first.'));
+  var run = ++runId; clearRoute(); showCards(true);
+  try {
+    say('wait', T('Lecture de l’index des données…', 'Reading the data index…')); await ready;
+    if (!HWL.length) throw new Error(T('données non chargées (voir le message en haut).', 'data not loaded (see the message above).'));
+    var a = pts.start, b = pts.end, D = a.distanceTo(b); if (D > MAXD) throw new Error(T('trajet trop long (' + MAXD / 1000 + ' km maximum à vol d’oiseau).', 'route too long (' + MAXD / 1000 + ' km maximum as the crow flies).'));
+    NUIT = estNuit(a);
+    LAT0 = (a.lat + b.lat) / 2;
+    var pad = cl(D * 0.35, 800, 3000), dl = pad / 110540, dn = pad / (Math.cos(LAT0 * Math.PI / 180) * 111320);
+    var bb = L.latLngBounds([Math.min(a.lat, b.lat) - dl, Math.min(a.lng, b.lng) - dn], [Math.max(a.lat, b.lat) + dl, Math.max(a.lng, b.lng) + dn]);
+    if (!(await loadNet(bb, run))) return;
+    say('wait', T('Recherche du meilleur chemin…', 'Finding the best route…')); await sleep(20);
+    var A = adjFor('bike', true), s = snapEdge(a, A), e = snapEdge(b, A);
+    if (!s || !e || s.d > 500 || e.d > 500) throw new Error(T('le départ ou l’arrivée est trop loin d’une rue ou d’un chemin accessible (les voies privées sont exclues).', 'the start or destination is too far from an accessible street or path (private roads are excluded).'));
+    var st = astar(A, s, e);
+    if (!st || !st.length) throw new Error(T('aucun chemin continu et accessible entre ces deux points.', 'no continuous accessible route between these two points.'));
+    routes = [{ m: metrics(st) }];
+    say('', '');
+    showRoutes(0, true); majURL(); airDuJour(a);
+  } catch (er) { if (run === runId) say('ko', er.message); }
+}
+var routeGroup = L.layerGroup().addTo(map);
+var REDUCED = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+/* Tracé « en mèche » : le trajet se dessine du départ vers l'arrivée, à vitesse constante, avec une étincelle
+   et quelques paillettes à sa tête. Une seule toile (canvas) posée sur la carte, 140 paillettes au plus : léger.
+   Désactivé si l'appareil demande moins d'animations. Un déplacement de la carte termine le tracé aussitôt. */
+var FX = null;
+function fuse(r, runs, cas, fin) {
+  if (FX) FX.stop();
+  fin = fin || function () {};
+  if (REDUCED) return fin();
+  var P = [], C = [0], cx = Math.cos(r.m.runs[0].ll[0][0] * Math.PI / 180) * 111320;
+  r.m.runs.forEach(function (x) { x.ll.forEach(function (p) { var q = P[P.length - 1]; if (!q || q[0] !== p[0] || q[1] !== p[1]) P.push(p); }); });
+  for (var i = 1; i < P.length; i++) C.push(C[i - 1] + Math.hypot((P[i][1] - P[i - 1][1]) * cx, (P[i][0] - P[i - 1][0]) * 110540));
+  var total = C[C.length - 1]; if (!(total > 0)) return fin();
+  var dur = cl(900 + total * 0.25, 1400, 3400), els = [], s0 = 0;
+  function dash(l, from, len) {
+    var el = l.getElement && l.getElement(); if (!el || !el.getTotalLength) return;
+    var n = el.getTotalLength(); if (!(n > 0)) return; els.push(el);
+    el.style.transition = 'none'; el.style.strokeDasharray = n + ' ' + n; el.style.strokeDashoffset = n; el.getBoundingClientRect();
+    el.style.transition = 'stroke-dashoffset ' + (dur * len / total) + 'ms linear ' + (dur * from / total) + 'ms'; el.style.strokeDashoffset = 0;
+  }
+  dash(cas, 0, total);
+  r.m.runs.forEach(function (x, k) {
+    var len = 0; for (var j = 1; j < x.ll.length; j++) len += Math.hypot((x.ll[j][1] - x.ll[j - 1][1]) * cx, (x.ll[j][0] - x.ll[j - 1][0]) * 110540);
+    dash(runs[k], s0, len); s0 += len;
+  });
+  var box = map.getContainer(), dpr = Math.min(window.devicePixelRatio || 1, 2), cv = document.createElement('canvas'), g = cv.getContext('2d');
+  var W = box.clientWidth, H = box.clientHeight; cv.width = W * dpr; cv.height = H * dpr;
+  cv.style.cssText = 'position:absolute;left:0;top:0;width:' + W + 'px;height:' + H + 'px;z-index:650;pointer-events:none';
+  box.appendChild(cv); g.scale(dpr, dpr);
+  var PT = [], MAXP = 140, COLS = ['#fff6d8', '#ffe08a', '#ffc04d', '#ff9a3c'], t0 = performance.now(), seg = 1, raf = 0, done = false;
+  function head(d) {
+    while (seg < C.length - 1 && C[seg] < d) seg++;
+    var a = C[seg - 1], b = C[seg], f = b > a ? (d - a) / (b - a) : 1, p = P[seg - 1], q = P[seg];
+    return map.latLngToContainerPoint([p[0] + f * (q[0] - p[0]), p[1] + f * (q[1] - p[1])]);
+  }
+  function frame(now) {
+    var f = Math.min(1, (now - t0) / dur), hp = f < 1 ? head(f * total) : null, k;
+    g.clearRect(0, 0, W, H); g.globalCompositeOperation = 'lighter';
+    if (hp) {
+      for (k = 0; k < 3 && PT.length < MAXP; k++) {
+        var an = Math.random() * Math.PI * 2, sp = 0.4 + Math.random() * 1.6;
+        PT.push({ x: hp.x, y: hp.y, vx: Math.cos(an) * sp, vy: Math.sin(an) * sp - 0.6, life: 0, max: 22 + Math.random() * 26, s: 0.8 + Math.random() * 1.6, c: COLS[(Math.random() * 4) | 0] });
+      }
+      var gr = g.createRadialGradient(hp.x, hp.y, 0, hp.x, hp.y, 14);
+      gr.addColorStop(0, 'rgba(255,246,216,.95)'); gr.addColorStop(0.35, 'rgba(255,190,80,.55)'); gr.addColorStop(1, 'rgba(255,140,40,0)');
+      g.fillStyle = gr; g.beginPath(); g.arc(hp.x, hp.y, 14, 0, 6.2832); g.fill();
+    }
+    for (k = PT.length - 1; k >= 0; k--) {
+      var o = PT[k]; o.life++; if (o.life >= o.max) { PT.splice(k, 1); continue; }
+      o.vx *= 0.96; o.vy = o.vy * 0.96 + 0.05; o.x += o.vx; o.y += o.vy;
+      g.globalAlpha = 1 - o.life / o.max; g.fillStyle = o.c; g.fillRect(o.x - o.s / 2, o.y - o.s / 2, o.s, o.s);
+    }
+    g.globalAlpha = 1;
+    if (f < 1 || PT.length) raf = requestAnimationFrame(frame); else stop();
+  }
+  function stop() {
+    if (done) return; done = true; cancelAnimationFrame(raf); cv.remove(); map.off('movestart zoomstart', stop); FX = null;
+    els.forEach(function (el) { el.style.transition = ''; el.style.strokeDasharray = ''; el.style.strokeDashoffset = ''; });
+    fin();
+  }
+  map.on('movestart zoomstart', stop);
+  FX = { stop: stop }; raf = requestAnimationFrame(frame);
+}
+/* Panneaux Départ / Arrivée : masqués pendant l'affichage du trajet, rouverts par « Modifier le trajet ». */
+function showCards(on) { $('cards').classList.toggle('gone', !on); $('edit').hidden = on || !routes.length; }
+/* Panneau Métadonnées et sources, en bas à droite. */
+function openMd(on) {
+  $('md').hidden = !on; $('mdOpen').setAttribute('aria-expanded', on); $('br').style.visibility = on ? 'hidden' : '';
+  (on ? $('md').querySelector('.x') : $('mdOpen')).focus();
+}
+document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !$('md').hidden) openMd(false); });
+
+/* Longs tronçons rouges : un message court indique la nuisance en cause (bruit, air ou les deux).
+   Les tronçons rouges séparés par moins de 60 m de rue plus calme sont réunis. Trois messages au plus. */
+function alertes(r) {
+  var R = r.m.runs, out = [], i = 0;
+  while (i < R.length) {
+    if (R[i].b !== 2) { i++; continue; }
+    var st = { len: 0, lb: 0, la: 0, ll: [] }, j = i;
+    while (j < R.length) {
+      var x = R[j];
+      if (x.b !== 2 && !(x.len < 60 && R[j + 1] && R[j + 1].b === 2)) break;
+      st.len += x.len; st.lb += x.lb; st.la += x.la; st.ll = st.ll.concat(x.ll); j++;
+    }
+    out.push(st); i = j;
+  }
+  var pix = function (ll) { var d = 0; for (var k = 1; k < ll.length; k++) d += map.latLngToContainerPoint(ll[k]).distanceTo(map.latLngToContainerPoint(ll[k - 1])); return d; };
+  out = out.filter(function (x) { return x.len >= 250 && (x.lb > x.len / 2 || x.la > x.len / 2) && pix(x.ll) >= 70; })
+    .sort(function (p, q) { return q.len - p.len; }).slice(0, 3);
+  out.forEach(function (x, n) {
+    var half = x.len / 2, acc = 0, mid = x.ll[0];
+    for (var k = 1; k < x.ll.length; k++) {
+      var d = L.latLng(x.ll[k - 1]).distanceTo(x.ll[k]);
+      if (acc + d >= half) { var f = d ? (half - acc) / d : 0; mid = [x.ll[k - 1][0] + f * (x.ll[k][0] - x.ll[k - 1][0]), x.ll[k - 1][1] + f * (x.ll[k][1] - x.ll[k - 1][1])]; break; }
+      acc += d;
+    }
+    var b = x.lb > x.len / 2, a = x.la > x.len / 2, txt = b && a ? T('Trop bruyant et air pollué', 'Too noisy and polluted air') : b ? T('Trop bruyant', 'Too noisy') : T('Air trop pollué', 'Polluted air');
+    var gauche = map.latLngToContainerPoint(mid).x > map.getSize().x - 200;   // près du bord droit : message à gauche du tronçon
+    setTimeout(function () {
+      routeGroup.addLayer(L.tooltip({ permanent: true, direction: gauche ? 'left' : 'right', offset: [gauche ? -12 : 12, 0], className: 'alert', interactive: false }).setLatLng(mid).setContent(txt));
+    }, n * 180);
+  });
+}
+
+/* Téléchargement de la trace, créée dans le navigateur (rien n'est envoyé) :
+   GPX (universel : Geovelo, Komoot, OsmAnd, compteurs GPS), KML (Google My Maps, Google Earth, Organic Maps),
+   GeoJSON (uMap, outils de cartographie). */
+var TRACES = [];
+function traces(r) {
+  var all = []; r.m.runs.forEach(function (x) { x.ll.forEach(function (p) { var q = all[all.length - 1]; if (!q || q[0] !== p[0] || q[1] !== p[1]) all.push(p); }); });
+  TRACES.forEach(function (u) { URL.revokeObjectURL(u); }); TRACES = [];
+  var nom = 'Oncyal - itinéraire au calme', f6 = function (v) { return v.toFixed(6); };
+  var gpx = '<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="Oncyal 06" xmlns="http://www.topografix.com/GPX/1/1">\n<trk><name>' + nom + '</name><trkseg>\n'
+    + all.map(function (p) { return '<trkpt lat="' + f6(p[0]) + '" lon="' + f6(p[1]) + '"/>'; }).join('\n') + '\n</trkseg></trk>\n</gpx>\n';
+  var kml = '<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>' + nom + '</name>'
+    + '<Style id="t"><LineStyle><color>ffe6a016</color><width>5</width></LineStyle></Style>'
+    + '<Placemark><name>' + nom + '</name><styleUrl>#t</styleUrl><LineString><tessellate>1</tessellate><coordinates>\n'
+    + all.map(function (p) { return f6(p[1]) + ',' + f6(p[0]) + ',0'; }).join('\n') + '\n</coordinates></LineString></Placemark></Document></kml>\n';
+  var geojson = JSON.stringify({ type: 'FeatureCollection', features: [{ type: 'Feature', properties: { name: nom, longueur_m: Math.round(r.m.len) },
+    geometry: { type: 'LineString', coordinates: all.map(function (p) { return [+f6(p[1]), +f6(p[0])]; }) } }] });
+  var u = function (txt, type) { var x = URL.createObjectURL(new Blob([txt], { type: type })); TRACES.push(x); return x; };
+  return { gpx: u(gpx, 'application/gpx+xml'), kml: u(kml, 'application/vnd.google-earth.kml+xml'), geojson: u(geojson, 'application/geo+json') };
+}
+function voletDl() { var v = $('dl'), b = $('dlb'), on = v.hidden; v.hidden = !on; b.setAttribute('aria-expanded', on); }
+
+/* ---------- Lien partageable : départ et arrivée dans l'adresse de la page ---------- */
+function majURL() {
+  if (!pts.start || !pts.end) return;
+  var c = function (p) { return p.lat.toFixed(5) + ',' + p.lng.toFixed(5); };
+  var q = new URLSearchParams({ de: c(pts.start), a: c(pts.end), dn: $('aS').value || '', an: $('aE').value || '' });
+  try { history.replaceState(null, '', location.pathname + '?' + q.toString()); } catch (e) {}
+}
+function partager() {
+  majURL();
+  var url = location.href, titre = 'Oncyal 06';
+  if (navigator.share) return navigator.share({ title: titre, text: T('Mon itinéraire à vélo au calme', 'My quiet bike route'), url: url }).catch(function () {});
+  (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(function () { say('ok', T('Lien copié : collez-le dans un message.', 'Link copied: paste it into a message.')); })
+    .catch(function () { window.prompt(T('Copiez ce lien :', 'Copy this link:'), url); });
+}
+function lireURL() {
+  var q = new URLSearchParams(location.search), de = q.get('de'), a = q.get('a');
+  if (!de || !a) return;
+  var p = function (v) { var t = v.split(',').map(Number); return t.length === 2 && isFinite(t[0]) && isFinite(t[1]) ? L.latLng(t[0], t[1]) : null; };
+  var s = p(de), e = p(a); if (!s || !e) return;
+  ready.then(function () {
+    if (!HWL.length || !inCov(s) || !inCov(e)) return;
+    setPoint('start', s, q.get('dn') || T('Départ', 'Start'), false); setPoint('end', e, q.get('an') || T('Arrivée', 'Destination'), false);
+  });
+}
+
+/* ---------- Signaler une erreur : note OpenStreetMap au milieu du trajet (la correction profite à tous) ---------- */
+function signaler(all) {
+  var p = all[Math.floor(all.length / 2)], la = p[0].toFixed(5), lo = p[1].toFixed(5);
+  return 'https://www.openstreetmap.org/note/new?lat=' + la + '&lon=' + lo + '#map=18/' + la + '/' + lo;
+}
+
+/* ---------- Qualité de l'air du jour (AtmoSud) ----------
+   Commune du départ via geo.api.gouv.fr (coordonnées arrondies à ~100 m), puis indice ATMO du jour publié par AtmoSud.
+   En cas d'épisode (Mauvais ou pire), un avertissement s'affiche. Source : AtmoSud. */
+var AIRJ = {};
+function airDuJour(ll) {
+  var my = runId, la = ll.lat.toFixed(3), lo = ll.lng.toFixed(3), cle = la + ',' + lo;
+  var p = AIRJ[cle] || (AIRJ[cle] = fetch('https://geo.api.gouv.fr/communes?lat=' + la + '&lon=' + lo + '&fields=code,nom&format=json')
+    .then(function (r) { return r.json(); }).then(function (c) {
+      if (!c.length) throw new Error('commune');
+      return fetch('https://api.atmosud.org/iqa2021/commune/indices/journalier?insee=' + c[0].code).then(function (r) { return r.json(); })
+        .then(function (j) {
+          var v = j[c[0].code] && j[c[0].code].valeurs, k = v && Object.keys(v).sort().pop();
+          if (!k) throw new Error('indice');
+          return { nom: c[0].nom, q: v[k].indice.qualificatif, c: v[k].indice.couleur, d: k };
+        });
+    }));
+  p.then(function (x) {
+    if (my !== runId || !$('airj')) return;
+    var EN = { 'Bon': 'Good', 'Moyen': 'Fair', 'Dégradé': 'Degraded', 'Mauvais': 'Poor', 'Très mauvais': 'Very poor', 'Extrêmement mauvais': 'Extremely poor' };
+    var q = LANG === 'en' ? (EN[x.q] || x.q) : x.q, el = $('airj');
+    el.innerHTML = '<i style="background:' + x.c + '"></i>' + T('Air aujourd’hui à ', 'Air today in ') + x.nom + T(' : ', ': ') + '<b>' + q + '</b><small>AtmoSud</small>';
+    el.hidden = false;
+    if (/Mauvais|mauvais/.test(x.q)) say('ko', T('Épisode de pollution aujourd’hui à ', 'Pollution episode today in ') + x.nom + ' (' + q + T(') : limitez l’effort.', '): take it easy.'));
+  }).catch(function () { delete AIRJ[cle]; });
+}
+
+/* ---------- Points utiles le long du trajet (OpenStreetMap, poi_06.py) ---------- */
+var POI = null, POIC = ['#4fd1ff', '#c3a6ff', '#ffb35c', '#7be0a6'];
+function pointsUtiles(all, r) {
+  var my = runId;
+  (POI || (POI = fetch(DATA + 'poi.json').then(function (x) { return x.json(); }).catch(function () { POI = null; return { p: [] }; }))).then(function (d) {
+    if (my !== runId) return;
+    var noms = [T('Fontaine', 'Drinking water'), T('Arceaux vélo', 'Bike parking'), T('Station de réparation', 'Repair station'), T('Magasin de cycles', 'Bike shop')];
+    var cx = Math.cos(all[0][0] * Math.PI / 180) * 111320, bb = L.latLngBounds(all).pad(0.02), nb = [0, 0, 0, 0], vus = [];
+    var P = all.map(function (q) { return [q[1] * cx, q[0] * 110540]; });
+    d.p.forEach(function (q) {
+      if (!bb.contains([q[0], q[1]])) return;
+      var x = q[1] * cx, y = q[0] * 110540, best = Infinity;
+      for (var i = 1; i < P.length; i++) {
+        var ax = P[i - 1][0], ay = P[i - 1][1], dx = P[i][0] - ax, dy = P[i][1] - ay, l2 = dx * dx + dy * dy, t = l2 ? cl(((x - ax) * dx + (y - ay) * dy) / l2, 0, 1) : 0;
+        var dd = Math.hypot(x - ax - t * dx, y - ay - t * dy); if (dd < best) best = dd;
+      }
+      if (best > 40) return;
+      nb[q[2]]++;
+      routeGroup.addLayer(L.circleMarker([q[0], q[1]], { radius: 5, color: '#08131d', weight: 2, fillColor: POIC[q[2]], fillOpacity: 1 })
+        .bindTooltip(noms[q[2]] + (q[3] ? ' · ' + q[3] : ''), { direction: 'top', offset: [0, -4] }));
+    });
+    var el = $('poij'), txt = [];
+    var mots = [[T('fontaine', 'drinking water'), T('fontaines', 'drinking water')], [T('arceaux', 'bike parking'), T('arceaux', 'bike parking')], [T('station de réparation', 'repair station'), T('stations de réparation', 'repair stations')], [T('magasin de cycles', 'bike shop'), T('magasins de cycles', 'bike shops')]];
+    nb.forEach(function (n, i) { if (n) txt.push('<span><i style="background:' + POIC[i] + '"></i>' + n + ' ' + mots[i][n > 1 ? 1 : 0] + '</span>'); });
+    if (el && txt.length) { el.innerHTML = T('Sur le trajet : ', 'Along the route: ') + txt.join(''); el.hidden = false; }
+  });
+}
+
+/* Affichage d'un trajet : les panneaux s'effacent, la carte se cadre en douceur sur le trajet (sans le placer sous
+   les panneaux), puis le trajet se dessine en mèche. Les messages d'alerte apparaissent une fois le tracé terminé. */
+function showRoutes(sel) {
+  routeGroup.clearLayers();
+  var r = routes[sel], m = r.m, all = [], my = runId; r.m.runs.forEach(function (x) { all = all.concat(x.ll); });
+  showCards(false);
+  var u = traces(r), ico = function (i) { return '<svg><use href="#i-' + i + '"/></svg>'; };
+  /* Notes expliquées : valeurs moyennes le long du trajet, avec un repère pour les comprendre.
+     Repères de l'OMS : bruit routier 53 dB Lden (2018) ; air NO₂ 10 µg/m³ et PM2,5 5 µg/m³ en moyenne annuelle (2021). */
+  var db = m.db, motB = db < 53 ? T('calme', 'quiet') : db < 60 ? T('modéré', 'moderate') : db < 68 ? T('bruyant', 'noisy') : T('très bruyant', 'very noisy');
+  var air = isNaN(m.no2) ? T('note ', 'score ') + Math.round(100 * m.a) + '/100'
+    : 'NO₂ ' + Math.round(m.no2) + (isNaN(m.pm25) ? '' : T(' · PM2,5 ', ' · PM2.5 ') + Math.round(m.pm25)) + ' µg/m³';
+  var lum = Math.round(100 * m.l) + '/100 · ' + Math.round(100 * m.ecl) + T(' % de rues éclairées', ' % lit streets');
+  var ligne = function (i, nom, val, rep) { return '<div class="ln">' + ico(i) + '<div><b>' + nom + '</b> ' + val + '<small>' + rep + '</small></div></div>'; };
+  $('sum').innerHTML = '<div class="km">' + fmt(m.len / 1000, 1) + ' km</div>'
+    + ligne('sound', T('Bruit', 'Noise'), Math.round(db) + ' dB · ' + motB, T('Moyenne sur 24 h · repère OMS : 53 dB', '24 h average · WHO guideline: 53 dB'))
+    + ligne('air', T('Air', 'Air'), air, T('Moyenne annuelle · repères OMS : 10 et 5 µg/m³', 'Annual average · WHO guidelines: 10 and 5 µg/m³'))
+    + ligne('light', T('Lumière', 'Light'), lum, NUIT ? T('De nuit : prise en compte dans le calcul', 'At night: taken into account') : T('De jour : non prise en compte dans le calcul', 'Daytime: not taken into account'))
+    + '<div id="airj" class="airj" hidden></div><div id="poij" class="poij" hidden></div>'
+    + '<div class="app"><button class="go" id="dlb" type="button" onclick="voletDl()" aria-expanded="false" aria-controls="dl">' + T('Télécharger la trace', 'Download the track') + '</button>'
+    + '<button type="button" onclick="partager()">' + T('Partager', 'Share') + '</button></div>'
+    + '<a class="sig" href="' + signaler(all) + '" target="_blank" rel="noopener">' + T('Signaler une erreur sur la carte', 'Report a map error') + '</a>'
+    + '<div id="dl" class="dl" hidden>'
+    + '<div class="fmt"><a href="' + u.gpx + '" download="oncyal-trajet.gpx">GPX</a><a href="' + u.kml + '" download="oncyal-trajet.kml">KML</a><a href="' + u.geojson + '" download="oncyal-trajet.geojson">GeoJSON</a></div>'
+    + T('<details><summary>Geovelo</summary><p>Fichier GPX. Sur le site geovelo.app, ouvrez Itinéraire, puis Importer un GPX, et choisissez le fichier.</p></details>'
+      + '<details><summary>Google Maps</summary><p>Fichier KML (ou GPX). Google Maps n’importe pas de trace directement : sur ordinateur, ouvrez Google My Maps (mymaps.google.com), créez une carte, puis Importer et choisissez le fichier. La carte apparaît ensuite dans l’application Google Maps, onglet Enregistrés, rubrique Cartes. Google Maps affiche la trace, mais son guidage suit ses propres rues.</p></details>'
+      + '<details><summary>Komoot</summary><p>Fichier GPX. Sur komoot.com, ouvrez le planificateur et importez le fichier : il devient un itinéraire que l’application peut suivre, avec guidage.</p></details>'
+      + '<details><summary>OsmAnd, Organic Maps</summary><p>Fichier GPX (ou KML pour Organic Maps). Ouvrez le fichier sur le téléphone avec l’application : la trace s’affiche et peut être suivie.</p></details>'
+      + '<details><summary>Compteur GPS (Garmin, Wahoo…)</summary><p>Fichier GPX. Importez-le comme parcours dans Garmin Connect ou l’application Wahoo, puis synchronisez le compteur.</p></details>',
+      '<details><summary>Geovelo</summary><p>GPX file. On geovelo.app, open Route, then Import a GPX, and choose the file.</p></details>'
+      + '<details><summary>Google Maps</summary><p>KML (or GPX) file. Google Maps cannot import a track directly: on a computer, open Google My Maps (mymaps.google.com), create a map, then Import and choose the file. The map then appears in the Google Maps app, under Saved, Maps. Google Maps shows the track, but its navigation follows its own streets.</p></details>'
+      + '<details><summary>Komoot</summary><p>GPX file. On komoot.com, open the route planner and import the file: it becomes a route the app can follow, with navigation.</p></details>'
+      + '<details><summary>OsmAnd, Organic Maps</summary><p>GPX file (or KML for Organic Maps). Open the file on your phone with the app: the track is shown and can be followed.</p></details>'
+      + '<details><summary>GPS bike computer (Garmin, Wahoo…)</summary><p>GPX file. Import it as a course in Garmin Connect or the Wahoo app, then sync the device.</p></details>')
+    + '</div>';
+  $('sum').hidden = false;
+  var narrow = window.innerWidth <= 640, opt = { paddingTopLeft: narrow ? [20, 80] : [40, 80], paddingBottomRight: narrow ? [20, 240] : [Math.min(300, window.innerWidth * 0.3), 50] };
+  var go = function () {
+    if (my !== runId || !routes.length) return;
+    var cas = L.polyline(all, { color: '#000', weight: 11, opacity: 0.5, lineJoin: 'round', lineCap: 'round' }); routeGroup.addLayer(cas);
+    var runs = r.m.runs.map(function (x) { var p = L.polyline(x.ll, { color: BC[x.b], weight: 6, opacity: 0.95, lineJoin: 'round', lineCap: 'round' }); routeGroup.addLayer(p); return p; });
+    fuse(r, runs, cas, function () { if (my === runId) { alertes(r); pointsUtiles(all, r); } });
+  };
+  if (REDUCED) { map.fitBounds(L.latLngBounds(all), opt); return go(); }
+  setTimeout(function () {
+    if (my !== runId) return;
+    var done = false, once = function () { if (done) return; done = true; map.off('moveend', once); go(); };
+    map.on('moveend', once); setTimeout(once, 1400);
+    map.flyToBounds(L.latLngBounds(all), Object.assign({ duration: 0.8 }, opt));
+  }, 320);
+}
+function clearRoute() { if (FX) FX.stop(); routeGroup.clearLayers(); routes = []; $('sum').hidden = true; $('sum').innerHTML = ''; $('edit').hidden = true; }
+function clearAll() {
+  runId++; clearRoute(); hl.clearLayers(); if (mode) setMode(mode); showCards(true);
+  ['start', 'end'].forEach(function (k) { if (mk[k]) map.removeLayer(mk[k]); mk[k] = null; pts[k] = null; });
+  $('aS').value = ''; $('aE').value = ''; say('', DEF);
+  try { history.replaceState(null, '', location.pathname); } catch (e) {}
+}
+
+/* ---------- Départ et arrivée : carte, adresse ou position ---------- */
+var BTN = { start: 'bS', end: 'bE' }, GEO = 'https://data.geopf.fr/geocodage/completion/', PHOTON = 'https://photon.komoot.io/api/', MYPOS = null;
+var VIDE = T('Aucun lieu ni adresse trouvé dans les Alpes-Maritimes.', 'No place or address found in the Alpes-Maritimes.');
+/* Point de référence pour classer les lieux par proximité : l'autre point déjà placé, sinon ma position, sinon le centre de la carte. */
+function biasPt() { return pts.start || pts.end || MYPOS || map.getCenter(); }
+var PIN = {
+  start: '<svg width="28" height="28" viewBox="0 0 28 28"><circle cx="14" cy="14" r="8" fill="#0e1418" stroke="#16a0e6" stroke-width="3"/><circle cx="14" cy="14" r="2.5" fill="#16a0e6"/></svg>',
+  end: '<svg width="28" height="28" viewBox="0 0 28 28"><path d="M14 27C14 27 5 17.5 5 11.5a9 9 0 0 1 18 0C23 17.5 14 27 14 27z" fill="#16a0e6"/><circle cx="14" cy="11.5" r="3.4" fill="#0e1418"/></svg>'
+};
+function inCov(ll) { return !!IDX[Math.floor(ll.lng / TS[0]) + '_' + Math.floor(ll.lat / TS[1])]; }
+function setMode(m) {
+  mode = mode === m ? null : m;
+  Object.keys(BTN).forEach(function (k) { $(BTN[k]).classList.toggle('on', mode === k); $(BTN[k]).setAttribute('aria-pressed', mode === k); });
+  if (mode) say('wait', mode === 'start' ? T('Touchez la carte pour placer le départ.', 'Tap the map to set the start.') : T('Touchez la carte pour placer l’arrivée.', 'Tap the map to set the destination.')); else if (!routes.length && !(pts.start || pts.end)) say('', DEF);
+  map.getContainer().style.cursor = mode ? 'crosshair' : '';
+}
+function warm(ll) {
+  ready.then(function () {
+    if (!HWL.length) return; var e = 0.015;
+    return pool(tkeys(L.latLngBounds([ll.lat - e, ll.lng - e], [ll.lat + e, ll.lng + e])).filter(function (k) { return IDX[k]; }), 3, function (k) { return load(k).catch(function () {}); });
+  }).catch(function () {});
+}
+function setPoint(k, ll, label, pan) {
+  pts[k] = ll; if (mk[k]) map.removeLayer(mk[k]);
+  mk[k] = L.marker(ll, { keyboard: false, icon: L.divIcon({ className: '', html: '<div class="pin-i">' + PIN[k] + '</div>', iconSize: [28, 28], iconAnchor: k === 'start' ? [14, 14] : [14, 27] }) }).addTo(map);
+  $(k === 'start' ? 'aS' : 'aE').value = label; warm(ll);
+  if (pts.start && pts.end) return computeRoute();
+  if (pan) map.setView(ll, Math.max(map.getZoom(), 15), { animate: false });
+  say('', '');
+}
+map.on('click', function (e) {
+  if (!mode) return;
+  var m = mode; setMode(m); setPoint(m, e.latlng, T('Point sur la carte', 'Point on the map'), false);
+  if (!(pts.start && pts.end)) setMode(pts.start ? 'end' : 'start');
+});
+function locate(k) {
+  if (!navigator.geolocation) return say('ko', T('La localisation n’est pas disponible sur cet appareil.', 'Location is not available on this device.'));
+  say('wait', T('Recherche de votre position…', 'Finding your location…'));
+  navigator.geolocation.getCurrentPosition(function (p) {
+    var ll = L.latLng(p.coords.latitude, p.coords.longitude); MYPOS = ll;
+    ready.then(function () {
+      if (!HWL.length || !inCov(ll)) return say('ko', T('Votre position est hors de la zone couverte (Alpes-Maritimes pour l’instant).', 'Your location is outside the covered area (Alpes-Maritimes for now).'));
+      setPoint(k, ll, T('Ma position', 'My location'), true);
+    });
+  }, function (er) {
+    say('ko', er.code === 1 ? T('Localisation refusée. Autorisez-la dans votre navigateur, ou saisissez une adresse.', 'Location denied. Allow it in your browser, or type an address.') : T('Position introuvable pour le moment. Saisissez une adresse ou placez le point sur la carte.', 'Location not found right now. Type an address or place the point on the map.'));
+  }, { timeout: 10000, maximumAge: 60000 });
+}
+function bindAddr(k, iid, lid) {
+  var inp = $(iid), ul = $(lid), items = [], cur = -1, timer = 0, seq = 0, ctl = null, memo = {};
+  function hide() { ul.hidden = true; inp.setAttribute('aria-expanded', 'false'); cur = -1; }
+  function mark(i) { cur = i; Array.prototype.forEach.call(ul.children, function (li, j) { li.classList.toggle('on', j === i); li.setAttribute('aria-selected', j === i); }); if (ul.children[i]) ul.children[i].scrollIntoView({ block: 'nearest' }); }
+  function pick(j) { var it = items[j]; if (!it) return; hide(); setPoint(k, L.latLng(it.y, it.x), it.t, true); }
+  function draw(list, msg) {
+    items = list; ul.innerHTML = '';
+    if (!list.length) { var n = document.createElement('li'); n.className = 'none'; n.textContent = msg; ul.appendChild(n); }
+    list.forEach(function (it, j) {
+      var li = document.createElement('li'); li.setAttribute('role', 'option'); li.textContent = it.t;
+      if (it.sub) { var sm = document.createElement('small'); sm.textContent = it.sub; li.appendChild(sm); }
+      li.addEventListener('mousedown', function (e) { e.preventDefault(); pick(j); }); ul.appendChild(li);
+    });
+    cur = -1; ul.hidden = false; inp.setAttribute('aria-expanded', 'true');
+  }
+  /* Recherche en deux sources, lancées en parallèle :
+     - Photon (komoot, données OpenStreetMap) : enseignes et lieux par leur nom (« Monoprix », « Grand Frais »),
+       classés du plus proche au plus lointain par rapport au point de référence ;
+     - IGN (Base Adresse Nationale) : adresses exactes.
+     Si la saisie commence par un chiffre (une adresse), l'IGN passe en premier ; sinon les lieux Photon. */
+  function ask(q) {
+    var my = ++seq, ref = biasPt(), key = q + '|' + ref.lat.toFixed(2) + ',' + ref.lng.toFixed(2);
+    if (memo[key]) return draw(memo[key], VIDE);
+    if (ctl) ctl.abort(); ctl = new AbortController(); var sig = ctl.signal;
+    ready.then(function () {
+      if (!COV) throw new Error('données');
+      var bb = [COV.getWest(), COV.getSouth(), COV.getEast(), COV.getNorth()].join(',');
+      var ign = fetch(GEO + '?' + new URLSearchParams({ text: q, type: 'StreetAddress,PositionOfInterest', maximumResponses: 10, bbox: bb }), { signal: sig })
+        .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
+        .then(function (j) { return (j.results || []).map(function (r) { return { t: r.fulltext || [r.street, r.zipcode, r.city].filter(Boolean).join(' '), x: +r.x, y: +r.y }; }); })
+        .catch(function (e) { if (e.name === 'AbortError') throw e; return []; });
+      var pho = fetch(PHOTON + '?' + new URLSearchParams({ q: q, lat: ref.lat.toFixed(4), lon: ref.lng.toFixed(4), limit: 8, lang: 'fr', bbox: bb }), { signal: sig })
+        .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
+        .then(function (j) {
+          return (j.features || []).map(function (f) {
+            var p = f.properties || {}, c = (f.geometry || {}).coordinates || [], rue = [p.housenumber, p.street].filter(Boolean).join(' ');
+            var lieu = p.name && p.name !== p.street ? p.name : '', adr = [rue, p.city].filter(Boolean).join(', ');
+            return { t: lieu ? lieu + (p.city ? ', ' + p.city : '') : adr, sub: lieu ? [rue, p.postcode, p.city].filter(Boolean).join(' ') : '', x: +c[0], y: +c[1] };
+          });
+        })
+        .catch(function (e) { if (e.name === 'AbortError') throw e; return []; });
+      return Promise.all([ign, pho]);
+    }).then(function (res) {
+      if (my !== seq) return;
+      var lists = /^\d/.test(q) ? [res[0], res[1]] : [res[1], res[0]], seen = {}, out = [];
+      lists.forEach(function (l) { l.forEach(function (it) {
+        var id = (it.t + '|' + (it.sub || '')).toLowerCase();
+        if (!it.t || !isFinite(it.x) || !isFinite(it.y) || seen[id] || !inCov(L.latLng(it.y, it.x))) return; seen[id] = 1; out.push(it);
+      }); });
+      memo[key] = out.slice(0, 7); draw(memo[key], VIDE);
+    }).catch(function (er) { if (er.name !== 'AbortError' && my === seq) draw([], T('Recherche indisponible. Placez le point avec le bouton carte.', 'Search unavailable. Place the point with the map button.')); });
+  }
+  inp.addEventListener('input', function () {
+    if (pts[k]) { pts[k] = null; if (mk[k]) { map.removeLayer(mk[k]); mk[k] = null; } }
+    clearTimeout(timer); var q = inp.value.trim();
+    if (q.length < 3) { seq++; return hide(); }
+    timer = setTimeout(function () { ask(q); }, 250);
+  });
+  inp.addEventListener('keydown', function (e) {
+    var n = items.length;
+    if (e.key === 'ArrowDown' && n) { e.preventDefault(); ul.hidden = false; mark((cur + 1) % n); }
+    else if (e.key === 'ArrowUp' && n) { e.preventDefault(); mark((cur - 1 + n) % n); }
+    else if (e.key === 'Enter' && !ul.hidden && n) { e.preventDefault(); pick(cur >= 0 ? cur : 0); }
+    else if (e.key === 'Escape') hide();
+  });
+  inp.addEventListener('focus', function () { if (items.length && inp.value.trim().length >= 3) ul.hidden = false; });
+  inp.addEventListener('blur', function () { setTimeout(hide, 150); });
+}
+bindAddr('start', 'aS', 'lS'); bindAddr('end', 'aE', 'lE');
+
+/* ---------- Langue de l'interface ----------
+   Textes fixes : attributs data-en (texte), data-en-ph (indication de saisie), data-en-t (info-bulle et nom accessible).
+   Métadonnées : blocs .fr et .en, l'un ou l'autre affiché selon la langue. */
+function appliquerLangue() {
+  document.documentElement.lang = LANG;
+  if (LANG === 'en') Array.prototype.forEach.call(document.querySelectorAll('[data-en],[data-en-ph],[data-en-t]'), function (el) {
+    if (el.dataset.en) el.textContent = el.dataset.en;
+    if (el.dataset.enPh) el.placeholder = el.dataset.enPh;
+    if (el.dataset.enT) { el.title = el.dataset.enT; el.setAttribute('aria-label', el.dataset.enT); }
+  });
+  $('lg').textContent = LANG === 'en' ? 'FR' : 'EN';
+  $('lg').setAttribute('aria-label', LANG === 'en' ? 'Passer en français' : 'Switch to English');
+}
+function changerLangue() { try { localStorage.setItem('oncyal_lang', LANG === 'en' ? 'fr' : 'en'); } catch (e) {} majURL(); location.reload(); }
+appliquerLangue();
+lireURL();
+
+/* ---------- Mode hors ligne : la page, les icônes et les zones déjà consultées restent disponibles sans réseau ---------- */
+if ('serviceWorker' in navigator && location.protocol === 'https:') window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
+
+/* ---------- Mesure d'audience Cloudflare Web Analytics (sans cookie) : active dès qu'un jeton est renseigné ---------- */
+var CF_JETON = '';
+if (CF_JETON) Array.prototype.forEach.call(document.querySelectorAll('.cfwa'), function (x) { x.hidden = false; });
+if (CF_JETON) { var sc_ = document.createElement('script'); sc_.defer = true; sc_.src = 'https://static.cloudflareinsights.com/beacon.min.js'; sc_.setAttribute('data-cf-beacon', JSON.stringify({ token: CF_JETON })); document.head.appendChild(sc_); }
+function swapPts() {
+  var a = pts.start, b = pts.end, ta = $('aS').value, tb = $('aE').value;
+  if (!ta && !tb) return;
+  clearRoute(); hl.clearLayers();
+  ['start', 'end'].forEach(function (k) { if (mk[k]) map.removeLayer(mk[k]); mk[k] = null; pts[k] = null; });
+  $('aS').value = tb; $('aE').value = ta;
+  if (b) setPoint('start', b, tb, false);
+  if (a) setPoint('end', a, ta, false);
+}
+
+</script>
+</body>
+</html>

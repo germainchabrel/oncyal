@@ -1,0 +1,18 @@
+# Environnement Python et caches
+venv/
+__pycache__/
+*.pyc
+
+# Données brutes téléchargées (OSM, Cerema, AtmoSud, NASA) : trop lourdes, retéléchargeables
+data/
+*.tif
+describe_*.xml
+
+# Résultats intermédiaires du pipeline (régénérés par mise_a_jour_06.py) ; site/tuiles reste versionné
+out/
+
+# Sauvegardes manuelles
+sauvegardes/
+
+# Divers
+*.part
