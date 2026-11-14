@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Oncyal 06 : itinéraires à vélo au calme</title>
-<meta name="description" content="Oncyal calcule un itinéraire à vélo qui évite le bruit, la pollution de l’air et la pollution lumineuse, rue par rue. Disponible dans les Alpes-Maritimes (06).">
+<meta name="description" content="Oncyal calcule un itinéraire à vélo qui évite le bruit et la pollution de l’air, rue par rue, et varie d’un jour à l’autre. Disponible dans les Alpes-Maritimes (06).">
 <meta name="theme-color" content="#08131d">
 <meta property="og:title" content="Oncyal 06">
-<meta property="og:description" content="Le chemin le plus calme à vélo : moins de bruit, moins de pollution, moins de lumière.">
+<meta property="og:description" content="Le chemin le plus calme à vélo : moins de bruit, moins de pollution, et un trajet qui change.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://oncyal.germain-chab.workers.dev/">
 <meta property="og:image" content="https://oncyal.germain-chab.workers.dev/og.png">
@@ -179,13 +179,43 @@ html[lang=en] .md .fr,html[lang=fr] .md .en{display:none}
 .lbv{display:flex;justify-content:space-between;align-items:center}
 .x2{background:none;border:0;color:var(--mute);font-size:18px;line-height:1;cursor:pointer;padding:0 2px}
 .x2:hover{color:var(--ink)}
+.expj{margin-top:9px;padding:7px 9px;border-left:2px solid var(--sage);background:#16a0e614;font-size:12px;color:var(--mute)}
+.expj b{display:block;font-weight:600;color:var(--ink)}
+.expj span{display:block;margin-top:3px}
+.decj{margin-top:9px;display:flex;gap:8px;font-size:12px;color:var(--ink)}
+.decj i{font-style:normal;color:var(--kf);font-size:15px;line-height:1.2}
+.decj b{font-weight:600}
+.decj small{display:block;font-size:11px;color:var(--mute)}
+.decm{width:24px;height:24px;border-radius:50%;background:#08131d;border:2px solid var(--kf);color:var(--kf);display:grid;place-items:center;font-size:13px;box-sizing:border-box}
+#sum .app button.sec{background:transparent;color:var(--ink);border-color:var(--line2);font-weight:500;font-size:12px}
+#sum .app+.app{margin-top:6px}
+.faitj{font-size:12px;color:var(--mute);display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:6px}
+.faitj:empty{display:none}
+.faitj button{padding:4px 12px;border-radius:999px;border:1px solid var(--sage);background:transparent;color:var(--sage);font:inherit;font-weight:600;cursor:pointer}
+.evp button.b2{background:transparent;color:var(--sage)}
+#sum{max-height:calc(100dvh - 150px);overflow-y:auto}
+#jr{position:fixed;z-index:1100;right:12px;bottom:22px;width:380px;max-width:calc(100vw - 24px);max-height:calc(100dvh - 44px);overflow-y:auto;padding:0 18px 8px;box-sizing:border-box;animation:rise .3s ease-out both;font-size:13px;color:var(--mute)}
+#jr .mdh{position:sticky;top:0;display:flex;align-items:center;justify-content:space-between;background:var(--bg);margin:0 -18px;padding:12px 18px 10px;border-bottom:1px solid var(--line);z-index:1}
+#jr .mdh h2{margin:0;font-size:14px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
+#jr .x{background:none;border:0;color:var(--mute);font-size:22px;line-height:1;cursor:pointer;padding:0 4px}
+#jr p{margin:10px 0 0}
+#jr b{color:var(--ink);font-weight:600}
+#jr .tete{font-size:14px;color:var(--ink)}
+#jr h3{margin:16px 0 4px;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
+#jr table{width:100%;margin-top:10px;border-collapse:collapse;font-size:12px}
+#jr th{text-align:left;font-weight:500;color:var(--mute);padding:3px 4px}
+#jr td{padding:4px;border-top:1px solid var(--line);color:var(--ink)}
+#jr .lien{background:none;border:0;padding:0;color:var(--sage);font:inherit;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+#jr .regl{display:block;margin-top:8px;color:var(--ink)}
+#jr select{background:var(--field);color:var(--ink);border:1px solid var(--line2);border-radius:6px;font:inherit;padding:2px 6px}
+#jr .note{font-size:11px}
 [hidden]{display:none!important}
 @media(max-width:640px){
   #col{width:auto;right:12px}
   #br{left:12px;align-items:stretch}
   #row{justify-content:flex-start}
   #row .pill{flex:1 1 auto;padding:7px 8px;font-size:12px}
-  #sum{padding:9px 11px}
+  #sum{padding:9px 11px;max-height:46dvh;max-width:none}
   #sum .km{font-size:18px}
   #sum .sc{gap:10px;font-size:12px;margin-top:3px}
   #sum .app{margin-top:7px}
@@ -260,8 +290,14 @@ html[lang=en] .md .fr,html[lang=fr] .md .en{display:none}
   <div id="row">
     <button class="pill" id="edit" type="button" onclick="showCards(true)" hidden data-en="Edit">Modifier</button>
     <button class="pill" type="button" onclick="clearAll()" data-en="Clear">Effacer</button>
+    <button class="pill" id="jrOpen" type="button" onclick="ouvrirJournal(true)" aria-expanded="false" aria-controls="jr" data-en="Journal">Journal</button>
     <button class="pill" id="mdOpen" type="button" onclick="openMd(true)" aria-expanded="false" aria-controls="md" data-en="Metadata">Métadonnées</button>
   </div>
+</div>
+
+<div id="jr" class="card jr" role="dialog" aria-label="Journal de calme" data-en-t="Calm journal" hidden>
+  <div class="mdh"><h2 data-en="Calm journal">Journal de calme</h2><button class="x" type="button" onclick="ouvrirJournal(false)" aria-label="Fermer" data-en-t="Close">×</button></div>
+  <div id="jrc"></div>
 </div>
 
 <div id="md" class="card md" role="dialog" aria-label="Métadonnées" data-en-t="Metadata" hidden>
@@ -275,16 +311,24 @@ html[lang=en] .md .fr,html[lang=fr] .md .en{display:none}
       <li>Ce sont des modèles et des estimations, pas des mesures prises dans la rue.</li>
       <li>Le bruit compte le trafic routier, ferroviaire et aérien (aérien d’après les plans d’exposition au bruit, une approximation), pas les chantiers, commerces ou événements. Le bruit de l’autoroute A8 est estimé : ses cartes officielles pour les Alpes-Maritimes ne sont pas publiées en données ouvertes.</li>
       <li>L’état du sol et la sécurité d’un chemin ne sont pas évalués.</li>
-      <li>Éviter la lumière peut mener vers des rues sombres : choisissez selon l’heure et votre sentiment de sécurité.</li>
       <li>Respectez la signalisation et restez attentif. Sur les voies piétonnes, roulez au pas ou poussez votre vélo.</li>
     </ul>
   </details>
 
   <details>
     <summary>Itinéraire</summary>
-    <p>Chaque rue a une durée de parcours, à vélo. Oncyal y ajoute des pénalités quand la rue est bruyante, polluée ou éclairée, puis cherche le trajet dont le total est le plus faible (algorithme A*).</p>
+    <p>Chaque rue a une durée de parcours, à vélo. Oncyal y ajoute des pénalités quand la rue est bruyante ou polluée, puis cherche le trajet dont le total est le plus faible (algorithme A*).</p>
     <ul>
-      <li>Le bruit et l’air sont les plus pénalisés. Entre 22 h et 6 h, le bruit pris en compte est le bruit de nuit (indicateur Lnight du Cerema, défini sur cette période). La lumière ne compte qu’après le coucher du soleil au départ.</li>
+      <li>Le bruit et l’air sont les plus pénalisés. Entre 22 h et 6 h, le bruit pris en compte est le bruit de nuit (indicateur Lnight du Cerema, défini sur cette période). La pollution lumineuse n’entre plus dans le calcul (projet mis de côté pour l’instant).</li>
+      <li>Trajet du jour : pour un trajet déjà calculé les jours précédents, une variante est proposée par d’autres rues, si elle reste presque aussi calme (2,5 dB de plus au maximum) et dans le détour accepté (4 min par défaut, réglable dans le Journal). « Surprends-moi » en demande une autre ; « Le plus calme » y revient.</li>
+      <li>Explication : une phrase compare le trajet au chemin direct (bruit, air, feux, temps) et nomme les deux rues qui font la différence.</li>
+      <li>Ombre : la position du soleil, la hauteur des bâtiments de chaque côté de la rue et les arbres disent si une rue est à l’ombre à l’heure du trajet. À 24 °C et plus, les rues à l’ombre sont préférées ; à 10 °C et moins, les rues au soleil. Par ciel couvert, rien ne change.</li>
+      <li>Vent : au-delà de 12 km/h, dans les rues bordées d’immeubles des deux côtés, celles que le vent prend en enfilade sont un peu préférées à celles qu’il prend de travers, où les gaz stagnent (estimation).</li>
+      <li>Marchés : un marché en cours, d’après ses horaires OpenStreetMap, est contourné.</li>
+      <li>Apprentissage : après un trajet, « J’ai fait ce trajet » puis « C’était calme ? ». Si non, le passage touché sur la carte coûtera plus cher dans tous vos prochains calculs, sur cet appareil.</li>
+      <li>Découverte du jour : une œuvre d’art, un point de vue ou un lieu historique à moins de 40 m du trajet est mis en avant, de préférence jamais vu.</li>
+      <li>Mesure en roulant : le micro du téléphone mesure le niveau sonore chaque seconde ; la valeur est indicative (téléphone non étalonné), les écarts entre rues sont fiables. Le passage le plus bruyant peut être retenu pour être évité.</li>
+      <li>Journal de calme : les trajets faits, leur bruit et leur air, comparés d’une semaine à l’autre ; les rues différentes parcourues et votre carte personnelle.</li>
       <li>Points noirs : chaque accident corporel impliquant un vélo recensé de 2020 à 2024 (ONISR) rend la rue plus coûteuse ; deux accidents ou plus à moins de 100 m l’un de l’autre sont signalés sur la carte.</li>
       <li>Épisode de pollution : si l’indice du jour est Mauvais ou pire, ou si le modèle horaire dépasse le seuil, le poids de l’air est renforcé de moitié et le trajet recalculé.</li>
       <li>Arrêts : chaque feu tricolore et chaque traversée d’un grand axe coûtent un peu (attente, stress, gaz respirés à l’arrêt) ; leur nombre est affiché.</li>
@@ -308,11 +352,11 @@ html[lang=en] .md .fr,html[lang=fr] .md .en{display:none}
     <ul>
       <li>Bruit : niveau moyen sur 24 heures (Lden, en dB). Officiel (Cerema 2022) pour les grandes routes et voies ferrées, estimé ailleurs d’après le type de voie et la proximité des grands axes. Repère de l’OMS pour le trafic routier : 53 dB. Moins de 53 dB : calme ; 53 à 60 : modéré ; 60 à 68 : bruyant ; au-delà : très bruyant.</li>
       <li>Air : concentrations moyennes de l’année 2024 modélisées par AtmoSud à 25 m, en µg/m³. Repères annuels de l’OMS (2021) : 10 µg/m³ pour le dioxyde d’azote (NO₂), 5 µg/m³ pour les particules fines (PM2,5). En ville, ces repères sont presque partout dépassés : la comparaison entre trajets reste parlante.</li>
-      <li>Lumière : note de 0 (rue sombre) à 100 (très éclairée), mêlant satellite NASA (précision d’environ 500 m) et éclairage public OpenStreetMap, et part des rues déclarées éclairées. Une rue sans information est comptée non éclairée.</li>
+      <li>Bruit mesuré : là où des habitants ont fait au moins 10 mesures avec l’application NoiseCapture (CNRS, Université Gustave Eiffel), le bruit de la rue est la moyenne du modèle et de la mesure, sans s’écarter de plus de 6 dB du modèle. Cela concerne environ 50 km de rues.</li>
+      <li>Ombre : pourcentage du trajet à l’ombre à l’heure du calcul. Les hauteurs de bâtiments viennent d’OpenStreetMap ; quand elles manquent, elles sont estimées d’après le nombre d’étages ou le type de bâtiment.</li>
       <li>Air aujourd’hui : indice ATMO du jour dans la commune de départ, publié par AtmoSud (Bon, Moyen, Dégradé, Mauvais, Très mauvais, Extrêmement mauvais).</li>
       <li>Air à cette heure : concentrations de NO₂ et de PM2,5 au point de départ pour l’heure en cours, issues du modèle AZUR Heure d’AtmoSud. C’est une modélisation recalculée chaque heure à partir des mesures des stations, des émissions et de la météo, pas la valeur d’une station isolée.</li>
       <li>Bruit des avions : zones A à D des plans d’exposition au bruit (aéroport de Nice, aérodrome de Cannes-Mandelieu), ajoutées au bruit des rues ; la nuit, estimé 12 dB plus bas.</li>
-      <li>Éclairage : une rue avec un lampadaire recensé dans OpenStreetMap à moins de 20 m est comptée éclairée (recensement très inégal : surtout à Antibes).</li>
     </ul>
   </details>
 
@@ -323,7 +367,9 @@ html[lang=en] .md .fr,html[lang=fr] .md .en{display:none}
       <li>Air : AtmoSud, modélisation 2024 ; indice du jour et modèle AZUR Heure : API publique AtmoSud.</li>
       <li>Bruit des avions : DGAC, zonage des plans d’exposition au bruit, Licence Ouverte.</li>
       <li>Accidents : ONISR, bases de données annuelles des accidents corporels 2020 à 2024, Licence Ouverte.</li>
-      <li>Lumière : NASA VIIRS Black Marble et OpenStreetMap.</li>
+      <li>Bruit mesuré : NoiseCapture / Noise-Planet (CNRS, Université Gustave Eiffel), licence ODbL.</li>
+      <li>Météo du moment (température, vent, nuages) : Open-Meteo, licence CC BY 4.0.</li>
+      <li>Bâtiments, arbres, curiosités et marchés : OpenStreetMap.</li>
       <li>Routes, accès, points utiles et fond de carte : © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">contributeurs OpenStreetMap</a>, licence ODbL, octobre 2026.</li>
       <li>Adresses : Base Adresse Nationale et IGN (Géoplateforme). Lieux et enseignes : Photon (komoot). Communes : geo.api.gouv.fr.</li>
       <li>Une rue refaite, fermée ou aménagée depuis peut avoir changé. Une erreur sur la carte ? Le lien Signaler une erreur ouvre une note OpenStreetMap à l’endroit du trajet.</li>
@@ -339,6 +385,9 @@ html[lang=en] .md .fr,html[lang=fr] .md .en{display:none}
       <li>Le lien de partage contient les coordonnées du départ et de l’arrivée : ne le partagez qu’avec des personnes de confiance si l’un des points est votre domicile.</li>
       <li>Les fichiers de trace sont créés dans votre navigateur : rien n’est envoyé.</li>
       <li>Les favoris Maison et Travail sont gardés dans votre navigateur, sur cet appareil uniquement.</li>
+      <li>Le journal, les rues parcourues, les passages appris, les découvertes vues et les variantes des jours précédents sont gardés dans votre navigateur, sur cet appareil uniquement. Le Journal permet de tout effacer.</li>
+      <li>Pour la météo, le point de départ arrondi à environ 1 km est envoyé à Open-Meteo. Pour nommer les rues de l’explication, deux points du trajet sont envoyés à l’IGN.</li>
+      <li>Mesure du bruit : le son n’est ni enregistré ni envoyé ; seul un niveau par seconde est calculé sur l’appareil, avec votre accord pour le micro et la position.</li>
       <li class="cfwa" hidden>Mesure d’audience anonyme, sans cookie : Cloudflare Web Analytics.</li>
     </ul>
   </details>
@@ -348,7 +397,7 @@ html[lang=en] .md .fr,html[lang=fr] .md .en{display:none}
     <ul>
       <li>Éditeur : particulier, à titre non professionnel. Conformément à l’article 6 de la loi pour la confiance dans l’économie numérique (LCEN), son identité est communiquée à l’hébergeur.</li>
       <li>Hébergeur : Cloudflare, Inc., 101 Townsend Street, San Francisco, CA 94107, États-Unis.</li>
-      <li>Données du site (dossier tuiles) : base de données dérivée d’OpenStreetMap, mise à disposition sous licence <a href="https://opendatacommons.org/licenses/odbl/1-0/" target="_blank" rel="noopener">ODbL 1.0</a>, © contributeurs OpenStreetMap, avec des données du Cerema, d’AtmoSud et de la NASA.</li>
+      <li>Données du site (dossier tuiles) : base de données dérivée d’OpenStreetMap, mise à disposition sous licence <a href="https://opendatacommons.org/licenses/odbl/1-0/" target="_blank" rel="noopener">ODbL 1.0</a>, © contributeurs OpenStreetMap, avec des données du Cerema, d’AtmoSud et de NoiseCapture.</li>
       <li>Données AtmoSud (modélisation 2024 et indice du jour) : réutilisées avec mention de la source ; conditions de réutilisation en cours de confirmation auprès d’AtmoSud.</li>
       <li>Fond de carte : tuiles OpenStreetMap, selon leur politique d’usage.</li>
     </ul>
@@ -363,16 +412,24 @@ html[lang=en] .md .fr,html[lang=fr] .md .en{display:none}
       <li>These are models and estimates, not street measurements.</li>
       <li>Noise counts road, rail and air traffic (air from airport noise exposure plans, an approximation), not building works, shops or events. A8 motorway noise is estimated: its official maps for the Alpes-Maritimes are not published as open data.</li>
       <li>Surface condition and path safety are not assessed.</li>
-      <li>Avoiding light can lead to dark streets: choose according to the time and how safe you feel.</li>
       <li>Follow road signs and stay alert. On pedestrian ways, ride at walking pace or push your bike.</li>
     </ul>
   </details>
 
   <details>
     <summary>Route</summary>
-    <p>Each street has a cycling time. Oncyal adds penalties when a street is noisy, polluted or brightly lit, then looks for the route with the lowest total (A* algorithm).</p>
+    <p>Each street has a cycling time. Oncyal adds penalties when a street is noisy or polluted, then looks for the route with the lowest total (A* algorithm).</p>
     <ul>
-      <li>Noise and air pollution weigh the most. Between 10 pm and 6 am, the noise used is night noise (Cerema Lnight indicator, defined over that period). Light only counts after sunset at the start point.</li>
+      <li>Noise and air pollution weigh the most. Between 10 pm and 6 am, the noise used is night noise (Cerema Lnight indicator, defined over that period). Light pollution is no longer part of the calculation (project set aside for now).</li>
+      <li>Route of the day: for a route already calculated on previous days, a variant along other streets is offered if it stays almost as quiet (2.5 dB more at most) and within the accepted detour (4 min by default, adjustable in the Journal). “Surprise me” asks for another; “Quietest” goes back.</li>
+      <li>Explanation: one sentence compares the route with the direct way (noise, air, traffic lights, time) and names the two streets that make the difference.</li>
+      <li>Shade: the sun’s position, building heights on each side of the street and trees tell whether a street is shaded at ride time. At 24 °C and above shaded streets are preferred; at 10 °C and below, sunny ones. Under overcast skies nothing changes.</li>
+      <li>Wind: above 12 km/h, in streets lined with buildings on both sides, those aligned with the wind are slightly preferred to those across it, where fumes linger (estimate).</li>
+      <li>Markets: a market in progress, from its OpenStreetMap opening hours, is avoided.</li>
+      <li>Learning: after a ride, “I rode this route” then “Was it quiet?”. If not, the section you tap on the map will cost more in all your future routes, on this device.</li>
+      <li>Sight of the day: an artwork, viewpoint or historic place within 40 m of the route is highlighted, preferably one never seen.</li>
+      <li>Measuring while riding: the phone microphone measures the sound level every second; the value is indicative (uncalibrated phone), differences between streets are reliable. The loudest section can be remembered and avoided.</li>
+      <li>Calm journal: rides done, their noise and air, compared week to week; the different streets ridden and your personal map.</li>
       <li>Black spots: each injury accident involving a bicycle recorded from 2020 to 2024 (ONISR) makes the street costlier; two or more accidents within 100 m are flagged on the map.</li>
       <li>Pollution episode: if today’s index is Poor or worse, or the hourly model exceeds the threshold, air pollution weighs half as much again and the route is recalculated.</li>
       <li>Stops: each traffic light and each major road crossing costs a little (waiting, stress, fumes breathed while stopped); their number is shown.</li>
@@ -396,11 +453,11 @@ html[lang=en] .md .fr,html[lang=fr] .md .en{display:none}
     <ul>
       <li>Noise: 24-hour average level (Lden, in dB). Official (Cerema 2022) for major roads and railways, estimated elsewhere from the road type and the distance to major roads. WHO guideline for road traffic: 53 dB. Below 53 dB: quiet; 53 to 60: moderate; 60 to 68: noisy; above: very noisy.</li>
       <li>Air: 2024 annual average concentrations modelled by AtmoSud at 25 m, in µg/m³. WHO annual guidelines (2021): 10 µg/m³ for nitrogen dioxide (NO₂), 5 µg/m³ for fine particles (PM2.5). In towns these guidelines are exceeded almost everywhere: comparing routes is still meaningful.</li>
-      <li>Light: score from 0 (dark street) to 100 (brightly lit), combining NASA satellite data (about 500 m precision) and OpenStreetMap street lighting, plus the share of streets tagged as lit. Streets with no information count as unlit.</li>
+      <li>Measured noise: where residents made at least 10 measurements with the NoiseCapture app (CNRS, Université Gustave Eiffel), street noise is the average of the model and the measurement, never more than 6 dB away from the model. This covers about 50 km of streets.</li>
+      <li>Shade: share of the route in the shade at calculation time. Building heights come from OpenStreetMap; when missing they are estimated from the number of floors or the building type.</li>
       <li>Air today: today’s ATMO index in the start municipality, published by AtmoSud (Good, Fair, Degraded, Poor, Very poor, Extremely poor).</li>
       <li>Air this hour: NO₂ and PM2.5 concentrations at the start point for the current hour, from AtmoSud’s AZUR hourly model. It is a model recalculated every hour from station measurements, emissions and weather, not the reading of a single station.</li>
       <li>Aircraft noise: zones A to D of airport noise exposure plans (Nice airport, Cannes-Mandelieu airfield), added to street noise; estimated 12 dB lower at night.</li>
-      <li>Lighting: a street with a street lamp mapped in OpenStreetMap within 20 m counts as lit (very uneven mapping: mostly in Antibes).</li>
     </ul>
   </details>
 
@@ -411,7 +468,9 @@ html[lang=en] .md .fr,html[lang=fr] .md .en{display:none}
       <li>Air: AtmoSud, 2024 modelling; today’s index and AZUR hourly model: AtmoSud public API.</li>
       <li>Aircraft noise: DGAC, airport noise exposure plan zoning, Licence Ouverte.</li>
       <li>Accidents: ONISR, annual road injury accident databases 2020 to 2024, Licence Ouverte.</li>
-      <li>Light: NASA VIIRS Black Marble and OpenStreetMap.</li>
+      <li>Measured noise: NoiseCapture / Noise-Planet (CNRS, Université Gustave Eiffel), ODbL licence.</li>
+      <li>Current weather (temperature, wind, clouds): Open-Meteo, CC BY 4.0 licence.</li>
+      <li>Buildings, trees, sights and markets: OpenStreetMap.</li>
       <li>Roads, access, points of interest and base map: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>, ODbL licence, October 2026.</li>
       <li>Addresses: Base Adresse Nationale and IGN (Géoplateforme). Places and shops: Photon (komoot). Municipalities: geo.api.gouv.fr.</li>
       <li>A street rebuilt, closed or redesigned since then may have changed. A map error? The Report a map error link opens an OpenStreetMap note on the route.</li>
@@ -427,6 +486,9 @@ html[lang=en] .md .fr,html[lang=fr] .md .en{display:none}
       <li>The share link contains the start and destination coordinates: only share it with people you trust if one of the points is your home.</li>
       <li>Track files are created in your browser: nothing is sent.</li>
       <li>Home and Work favourites are kept in your browser, on this device only.</li>
+      <li>The journal, ridden streets, learned sections, seen sights and previous days’ variants are kept in your browser, on this device only. The Journal lets you erase everything.</li>
+      <li>For the weather, the start point rounded to about 1 km is sent to Open-Meteo. To name the streets in the explanation, two points of the route are sent to IGN.</li>
+      <li>Noise measurement: sound is neither recorded nor sent; only one level per second is computed on the device, with your consent for the microphone and location.</li>
       <li class="cfwa" hidden>Anonymous, cookie-free audience measurement: Cloudflare Web Analytics.</li>
     </ul>
   </details>
@@ -436,7 +498,7 @@ html[lang=en] .md .fr,html[lang=fr] .md .en{display:none}
     <ul>
       <li>Publisher: private individual, non-professional. In accordance with article 6 of the French LCEN law, their identity has been provided to the host.</li>
       <li>Host: Cloudflare, Inc., 101 Townsend Street, San Francisco, CA 94107, United States.</li>
-      <li>Site data (tiles folder): database derived from OpenStreetMap, made available under the <a href="https://opendatacommons.org/licenses/odbl/1-0/" target="_blank" rel="noopener">ODbL 1.0</a> licence, © OpenStreetMap contributors, with data from Cerema, AtmoSud and NASA.</li>
+      <li>Site data (tiles folder): database derived from OpenStreetMap, made available under the <a href="https://opendatacommons.org/licenses/odbl/1-0/" target="_blank" rel="noopener">ODbL 1.0</a> licence, © OpenStreetMap contributors, with data from Cerema, AtmoSud and NoiseCapture.</li>
       <li>AtmoSud data (2024 modelling and today’s index): reused with attribution; reuse terms being confirmed with AtmoSud.</li>
       <li>Base map: OpenStreetMap tiles, under their usage policy.</li>
     </ul>
@@ -498,6 +560,7 @@ function parse(buf) {
   if (p + m <= buf.byteLength) t.nn = arr(Uint8Array, m);           // bruit de nuit, Lnight (nuit_06.py)
   if (p + n <= buf.byteLength) t.nf = arr(Uint8Array, n);           // nœuds : bit 0 = feux tricolores (signaux_06.py)
   if (p + 2 * m <= buf.byteLength) { t.av = arr(Uint8Array, m); t.pz = arr(Uint8Array, m); }   // accidents vélo 2020-2024, zone avion (PEB)
+  if (p + 4 * m <= buf.byteLength) { t.og = arr(Uint8Array, m); t.od = arr(Uint8Array, m); t.ar = arr(Uint8Array, m); t.ms = arr(Uint8Array, m); }   // ombre : bâtiments à gauche et à droite, arbres (ombre_06.py) ; bruit corrigé par des mesures (mesures_06.py)
   t.mx = new Float64Array(n); t.my = new Float64Array(n);
   for (var i = 0; i < n; i++) { var r = t.lat[i] / 1e6 * Math.PI / 180; t.mx[i] = (t.lon[i] / 1e6 + 180) / 360; t.my[i] = (1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2; }
   return t;
@@ -544,29 +607,34 @@ var MAXD = 25000;   // distance maximale à vol d'oiseau (m)
    Réglage testé sur 25 trajets de 1 à 8 km autour de Nice : −6 dB en moyenne pour +11 % de distance (+27 % au pire).
    La pénalité absolue sur l'air ne joue qu'au-delà de 0,92 : en ville, l'air est noté élevé presque partout,
    et une pénalité uniforme découragerait tout détour sans rien éviter. */
-var PEN = { rel: { n: 25, a: 20, l: 6 }, abs: { n: 25, a: 4 } };
-function penalite(rn, ra, rl, db, a, nuit) {
-  return 1 + PEN.rel.n * rn + PEN.rel.a * AIRB * ra + (nuit ? PEN.rel.l * rl : 0)
+var PEN = { rel: { n: 25, a: 20 }, abs: { n: 25, a: 4 } };
+/* La pollution lumineuse est sortie du calcul (projet mis de côté) : seuls le bruit et l'air pénalisent une rue. */
+function penalite(rn, ra, db, a) {
+  return 1 + PEN.rel.n * rn + PEN.rel.a * AIRB * ra
     + PEN.abs.n * cl(((isNaN(db) ? 40 : db) - 60) / 15, 0, 1) + PEN.abs.a * cl((a - 0.92) / 0.08, 0, 1);
 }
 /* Nuisances franches d'une rue (couleur rouge et messages) ; la lumière, nuisance moindre, n'y entre pas.
    Bruit : 68 dB(A) Lden, seuil réglementaire des « points noirs du bruit » routier.
    Air : parmi les 15 % de rues les plus polluées du secteur, et note élevée dans le département. */
-/* La pollution lumineuse ne gêne qu'une fois le soleil couché : de jour, elle n'entre pas dans le calcul.
-   Hauteur du soleil d'après la date et le lieu (formules de l'éphéméride simplifiée, précision ~1 min). */
-function hauteurSoleil(lat, lng, d) {
+/* Position du soleil d'après la date et le lieu (éphéméride simplifiée, précision ~1 min) : hauteur h au-dessus de
+   l'horizon et azimut az (0 = nord, 90 = est), en degrés. Sert à l'ombre des rues et aux parcs fermés la nuit. */
+function soleil(lat, lng, d) {
   var r = Math.PI / 180, j = d.getTime() / 86400000 - 10957.5, M = r * (357.5291 + 0.98560028 * j);
   var Lm = M + r * (1.9148 * Math.sin(M) + 0.02 * Math.sin(2 * M) + 0.0003 * Math.sin(3 * M)) + r * 102.9372 + Math.PI, e = r * 23.4397;
   var dec = Math.asin(Math.sin(e) * Math.sin(Lm)), ra = Math.atan2(Math.sin(Lm) * Math.cos(e), Math.cos(Lm)), H = r * (280.16 + 360.9856235 * j) + r * lng - ra;
-  return Math.asin(Math.sin(r * lat) * Math.sin(dec) + Math.cos(r * lat) * Math.cos(dec) * Math.cos(H)) / r;
+  var h = Math.asin(Math.sin(r * lat) * Math.sin(dec) + Math.cos(r * lat) * Math.cos(dec) * Math.cos(H));
+  var az = Math.atan2(Math.sin(H), Math.cos(H) * Math.sin(r * lat) - Math.tan(dec) * Math.cos(r * lat)) + Math.PI;
+  return { h: h / r, az: ((az / r) % 360 + 360) % 360 };
 }
+function hauteurSoleil(lat, lng, d) { return soleil(lat, lng, d).h; }
 function estNuit(ll) { return hauteurSoleil(ll.lat, ll.lng, new Date()) < -0.833; }
-/* NUIT : période de l'indicateur Lnight (22 h - 6 h, heure de Nice) : bruit de nuit. NUITL : soleil couché : lumière comptée. */
+/* NUIT : période de l'indicateur Lnight (22 h - 6 h, heure de Nice) : bruit de nuit. NUITL : soleil couché (parcs fermés). */
 var NUIT = false, NUITL = false, LLZ = L.latLng(43.7, 7.26), AIRB = 1;
 function heureNuit() { var h = +new Date().toLocaleString('en-GB', { timeZone: 'Europe/Paris', hour: '2-digit', hour12: false }); return h >= 22 || h < 6; }
 function majPen(g, nuit) {
+  var dyn = g.dyn;
   for (var j = 0; j < g.M; j++) {
-    var p = nuit ? penalite(g.rnN[j], g.ra[j], g.rl[j], g.dbN[j] + 10, g.a[j], NUITL) : penalite(g.rn[j], g.ra[j], g.rl[j], g.db[j], g.a[j], NUITL);
+    var p = (nuit ? penalite(g.rnN[j], g.ra[j], g.dbN[j] + 10, g.a[j]) : penalite(g.rn[j], g.ra[j], g.db[j], g.a[j])) * dyn[j];
     var z = g.zone[j], e = z ? ZETAT[z] : 0;
     // fermé ou interdit : exclu ; enceinte, horaires illisibles ou parc la nuit : x1000, emprunté seulement s'il n'existe aucun autre chemin
     g.pen[j] = e === 3 ? Infinity : e === 1 || e === 2 ? p * 1000 : p;
@@ -574,6 +642,136 @@ function majPen(g, nuit) {
   if (EVITE.size) for (var q = 0; q < g.M; q++) if (EVITE.has(cleArete(g, q))) g.pen[q] = Infinity;   // passages évités par l'utilisateur
   g.nuit = nuit;
 }
+/* ---------- Mémoire de l'appareil : tout ce qui suit reste dans le navigateur, rien n'est envoyé ---------- */
+function lireM(k, d) { try { var v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } }
+function ecrireM(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
+/* Empreinte d'un bout de rue (ses deux extrémités, à 1 m près) : la même d'une visite à l'autre, quel que soit le réseau chargé. */
+function hAr(la1, lo1, la2, lo2) {
+  var a = Math.round(la1 * 1e5) * 7919 + Math.round(lo1 * 1e5), b = Math.round(la2 * 1e5) * 7919 + Math.round(lo2 * 1e5), t;
+  if (a > b) { t = a; a = b; b = t; } return (a * 31 + b) % 4294967291;
+}
+var REGL = Object.assign({ varier: true, detour: 4 }, lireM('oncyal_regl', {}));   // trajet du jour : activé, détour accepté (minutes)
+var APPRIS = lireM('oncyal_appris', {});                                            // passages qui ont gêné : empreinte -> nombre de fois
+var RUES = lireM('oncyal_rues', { h: [], m: 0 }), CONNU = new Set(RUES.h);          // rues déjà parcourues
+var VUS = lireM('oncyal_vus', []);                                                  // découvertes déjà vues
+var TESTS = false, SURP = new Set(), FIXE = false, APPRENDRE = false;
+
+/* ---------- Le jour en cours : météo, soleil, vent, marchés ----------
+   Le trajet le plus calme n'est pas le même un matin d'août et un soir de janvier. Avant chaque calcul :
+   - ombre : par temps chaud (24 °C et plus) les rues à l'ombre sont préférées, par temps froid (10 °C et moins) les rues
+     au soleil ; l'ombre vient de la position du soleil, de la hauteur des bâtiments de chaque côté de la rue et des arbres ;
+   - vent : dans une rue bordée d'immeubles des deux côtés, un vent de travers piège les gaz, un vent dans l'axe les
+     chasse ; au-delà de 12 km/h, la pénalité d'air de ces rues est modulée d'un quart au plus (estimation) ;
+   - marchés : un marché en cours (horaires OpenStreetMap) est contourné ;
+   - passages appris : une rue signalée comme gênante après un trajet coûte plus cher, durablement.
+   Le tout forme un multiplicateur par rue (g.dyn), appliqué à la pénalité de bruit et d'air. Météo : Open-Meteo. */
+var JOUR = { meteo: null, sol: null, chaud: false, froid: false, marches: [] }, METEO = {}, CURIO = null;
+function meteo(ll) {
+  var la = ll.lat.toFixed(2), lo = ll.lng.toFixed(2), cle = la + ',' + lo + '|' + Math.floor(Date.now() / 1800000);
+  var p = METEO[cle] || (METEO[cle] = fetch('https://api.open-meteo.com/v1/forecast?latitude=' + la + '&longitude=' + lo + '&current=temperature_2m,wind_speed_10m,wind_direction_10m,cloud_cover&wind_speed_unit=kmh')
+    .then(function (r) { return r.json(); }).then(function (j) { var c = j.current; if (!c) throw new Error('météo'); return { t: c.temperature_2m, v: c.wind_speed_10m, dv: c.wind_direction_10m, nu: c.cloud_cover }; })
+    .catch(function () { delete METEO[cle]; return null; }));
+  return Promise.race([p, sleep(2500).then(function () { return null; })]);
+}
+function curio() { return CURIO || (CURIO = fetch(DATA + 'curio.json').then(function (r) { return r.json(); }).catch(function () { CURIO = null; return { p: [], m: [] }; })); }
+/* Grille de repérage : les rues dont le milieu est à moins de r mètres d'un point. */
+function grille(g) {
+  if (g.gr) return g.gr; var m = new Map();
+  for (var e = 0; e < g.M; e++) {
+    var k = Math.floor((g.nlat[g.eu[e]] + g.nlat[g.ev[e]]) / 2 / 0.0006) * 100000 + Math.floor((g.nlon[g.eu[e]] + g.nlon[g.ev[e]]) / 2 / 0.0008), l = m.get(k);
+    if (l) l.push(e); else m.set(k, [e]);
+  }
+  return (g.gr = m);
+}
+function aretesPres(g, lat, lng, r) {
+  var gr = grille(g), out = [], ny = Math.ceil(r / 66), nx = Math.ceil(r / 64), y0 = Math.floor(lat / 0.0006), x0 = Math.floor(lng / 0.0008), cx = Math.cos(lat * Math.PI / 180) * 111320;
+  for (var y = y0 - ny; y <= y0 + ny; y++) for (var x = x0 - nx; x <= x0 + nx; x++) {
+    var l = gr.get(y * 100000 + x); if (!l) continue;
+    for (var i = 0; i < l.length; i++) {
+      var e = l[i], dy = ((g.nlat[g.eu[e]] + g.nlat[g.ev[e]]) / 2 - lat) * 110540, dx = ((g.nlon[g.eu[e]] + g.nlon[g.ev[e]]) / 2 - lng) * cx;
+      if (dx * dx + dy * dy <= r * r) out.push(e);
+    }
+  }
+  return out;
+}
+var VENTS = [['du nord', 'north'], ['du nord-est', 'north-east'], ['d’est', 'east'], ['du sud-est', 'south-east'], ['du sud', 'south'], ['du sud-ouest', 'south-west'], ['d’ouest', 'west'], ['du nord-ouest', 'north-west']];
+async function majJour(g, ll, bb) {
+  var dyn = g.dyn, omb = g.omb, M = g.M, j, r = Math.PI / 180, now = new Date(), mois = now.getMonth();
+  dyn.fill(1); omb.fill(0);
+  var mt = TESTS ? null : await meteo(ll), sol = soleil(ll.lat, ll.lng, now);
+  var chaud = mt ? mt.t >= 24 : (mois >= 5 && mois <= 8), froid = mt ? mt.t <= 10 : (mois === 11 || mois <= 1), couvert = !!(mt && mt.nu >= 85);
+  var jour = sol.h > 6, soleilActif = jour && !couvert && (chaud || froid) && !TESTS, vent = !!(mt && mt.v >= 12) && !TESTS;
+  JOUR = { meteo: mt, sol: sol, jour: jour, chaud: soleilActif && chaud, froid: soleilActif && !chaud && froid, vent: vent, marches: [] };
+  if (jour || vent) {
+    var cx = Math.cos(ll.lat * r), sx = Math.sin(sol.az * r), sy = Math.cos(sol.az * r), tg = Math.tan(Math.max(sol.h, 1) * r);
+    var wx = vent ? Math.sin(mt.dv * r) : 0, wy = vent ? Math.cos(mt.dv * r) : 0;
+    for (j = 0; j < M; j++) {
+      var u = g.eu[j], v = g.ev[j], dx = (g.nlon[v] - g.nlon[u]) * cx, dy = g.nlat[v] - g.nlat[u], n = Math.sqrt(dx * dx + dy * dy) || 1;
+      if (jour) {
+        var cr = (dx * sy - dy * sx) / n, s = (cr > 0 ? g.og[j] : g.od[j]) * Math.abs(cr) / tg >= 1 ? 1 : 0;   // cr > 0 : soleil à gauche de la rue
+        if (!s && g.arb[j]) s = 0.7;
+        omb[j] = s;
+        if (soleilActif) dyn[j] *= chaud ? 1 + 0.5 * (1 - s) : 1 + 0.3 * s;
+      }
+      if (vent && g.og[j] > 0.5 && g.od[j] > 0.5) dyn[j] *= 1 + 0.25 * (1 - Math.abs(dx * wx + dy * wy) / n) * g.ra[j];
+    }
+  }
+  if (Object.keys(APPRIS).length) for (j = 0; j < M; j++) { var na = APPRIS[g.hk[j]]; if (na) dyn[j] *= 1 + 4 * Math.min(na, 3); }
+  if (TESTS) return;
+  var cu = await curio(), ms = cu.m.filter(function (m) { return bb.contains([m[0], m[1]]); });
+  if (ms.length) {
+    var OH = await chargerOH(), loc = { lat: ll.lat, lon: ll.lng, address: { country_code: 'fr', state: "Provence-Alpes-Côte d'Azur" } };
+    if (OH) ms.forEach(function (m) {
+      try {
+        if (!new OH(m[4], loc).getState(now)) return;
+        var es = aretesPres(g, m[0], m[1], m[2] + 15); es.forEach(function (e) { dyn[e] *= 6; });
+        JOUR.marches.push({ n: m[3], ll: [m[0], m[1]], es: new Set(es) });
+      } catch (e) {}
+    });
+  }
+}
+
+/* ---------- Trajet du jour et « Surprends-moi » ----------
+   Faire chaque jour le même trajet use. Pour un trajet déjà calculé les jours précédents, Oncyal cherche une variante :
+   les rues empruntées ces jours-là coûtent plus cher, les rues jamais parcourues et celles qui passent devant une
+   découverte encore inconnue coûtent moins. La variante n'est retenue que si elle reste presque aussi calme que le
+   meilleur trajet (2,5 dB de plus au maximum, air à peine moins bon) et ne dépasse pas le détour accepté (4 min par défaut).
+   « Surprends-moi » fait la même chose à la demande, en écartant les trajets déjà proposés pour ce trajet. */
+function chemin(A, s, sv, e, pe) { if (!sv) return astar(A, s, e, pe); var p = astar(A, s, sv, pe), q = p && astar(A, sv, e, pe); return p && q ? p.concat(q) : null; }
+function empreintes(st) { var S = new Set(); st.forEach(function (x) { if (x.f > 0) S.add(G.hk[x.e]); }); return S; }
+function cleHist() { return [pts.start, pts.via, pts.end].map(function (p) { return p ? p.lat.toFixed(4) + ',' + p.lng.toFixed(4) : '-'; }).join('|'); }
+function jourJ(d) { d = d || new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+function part(st, S) { var a = 0, b = 0; st.forEach(function (x) { var d = G.len[x.e] * x.f; b += d; if (S.has(G.hk[x.e])) a += d; }); return b ? a / b : 0; }
+async function presCurio(g, bb) {
+  if (g.cur) return g.cur; var f = new Uint8Array(g.M), cu = await curio(), vus = new Set(VUS);
+  cu.p.forEach(function (p) { if (bb.contains([p[0], p[1]]) && !vus.has(p[0] + ',' + p[1])) aretesPres(g, p[0], p[1], 35).forEach(function (e) { f[e] = 1; }); });
+  return (g.cur = f);
+}
+async function variante(A, s, sv, e, st0, m0, bb) {
+  var U = new Set(), auj = jourJ(), hist = (lireM('oncyal_hist', {})[cleHist()] || []).filter(function (x) { return x.j !== auj; });
+  if (REGL.varier && !FIXE && !TESTS) hist.forEach(function (x) { x.h.forEach(function (h) { U.add(h); }); });
+  SURP.forEach(function (h) { U.add(h); });
+  if (!U.size) return null;
+  var cur = await presCurio(G, bb), forces = [5, 2.5], M = G.M;
+  for (var k = 0; k < forces.length; k++) {
+    var pe = new Float32Array(G.pen), F = forces[k];
+    for (var j = 0; j < M; j++) { var h = G.hk[j]; if (U.has(h)) pe[j] *= F; else { if (cur[j]) pe[j] *= 0.75; if (CONNU.size && !CONNU.has(h)) pe[j] *= 0.9; } }
+    var st = chemin(A, s, sv, e, pe); if (!st) continue;
+    if (part(st, empreintes(st0)) > 0.9) return null;                  // la variante retombe sur le trajet le plus calme : on le garde
+    var m = metrics(st);
+    if (m.t <= m0.t + REGL.detour * 60 && m.db <= m0.db + 2.5 && m.a <= m0.a + 0.06 && part(st, U) < 0.75) return { st: st, m: m };
+  }
+  return null;
+}
+function noterHist(st) {
+  if (TESTS) return; var H = lireM('oncyal_hist', {}), k = cleHist(), auj = jourJ(), l = (H[k] || []).filter(function (x) { return x.j !== auj; });
+  l.push({ j: auj, h: Array.from(empreintes(st)) }); H[k] = l.slice(-5);
+  var ks = Object.keys(H); if (ks.length > 8) { ks.sort(function (a, b) { return H[a][H[a].length - 1].j < H[b][H[b].length - 1].j ? -1 : 1; }); delete H[ks[0]]; }
+  ecrireM('oncyal_hist', H);
+}
+function surprendre() { var r = routes[0]; if (!r) return; empreintes(r.st).forEach(function (h) { SURP.add(h); }); FIXE = false; computeRoute(); }
+function plusCalme() { SURP.clear(); FIXE = true; computeRoute(); }
+
 /* ---------- Accès incertains (zones_06.py) ----------
    Les lieux clos (hippodromes, stades, campus, hôpitaux, cimetières, parcs) sont les plus calmes, donc attirants pour
    le calcul, alors qu'OpenStreetMap dit rarement s'ils sont fermés. Trois étages :
@@ -654,7 +852,8 @@ function buildGraph(ts) {
   var eu = new Int32Array(M), ev = new Int32Array(M), len = new Float32Array(M), hw = new Uint8Array(M), acc = new Uint8Array(M),
       en = new Float32Array(M), ea = new Float32Array(M), el = new Float32Array(M), edb = new Float32Array(M),
       no2 = new Float32Array(M), pm25 = new Float32Array(M), lit = new Uint8Array(M), zone = new Uint16Array(M),
-      enN = new Float32Array(M), edbN = new Float32Array(M), accv = new Uint8Array(M), avz = new Uint8Array(M), sigs = [];
+      enN = new Float32Array(M), edbN = new Float32Array(M), accv = new Uint8Array(M), avz = new Uint8Array(M), sigs = [],
+      og = new Float32Array(M), od = new Float32Array(M), arb = new Uint8Array(M), mes = new Uint8Array(M);
   ts.forEach(function (t) {
     if (!t) return; var mp = new Int32Array(t.n), i;
     for (i = 0; i < t.n; i++) { var g = idx.get(t.id[i]); if (g === undefined) { g = nlon.length; idx.set(t.id[i], g); nlon.push(t.lon[i] / 1e6); nlat.push(t.lat[i] / 1e6); } mp[i] = g; if (t.nf && (t.nf[i] & 1)) sigs.push(g); }
@@ -667,17 +866,20 @@ function buildGraph(ts) {
       var oN = t.nn ? t.nn[i] : 255, dbN = oN === 255 ? (isNaN(c.db) ? NaN : c.db - 8) : oN / 4 + 30;
       edbN[k] = dbN; enN[k] = isNaN(dbN) ? 0 : cl((dbN - 40) / 25, 0, 1);
       if (t.av) { accv[k] = t.av[i]; avz[k] = t.pz[i]; }
-      no2[k] = t.no2[i] === 255 ? NaN : t.no2[i] / 2; pm25[k] = t.pm25[i] === 255 ? NaN : t.pm25[i] / 2; lit[k] = ((t.fl[i] >> 2) & 3) === 2 ? 1 : 0; if (t.zone) zone[k] = t.zone[i];
+      if (t.og) { og[k] = t.og[i] / 10; od[k] = t.od[i] / 10; arb[k] = t.ar[i]; mes[k] = t.ms[i]; }
+      no2[k] = t.no2[i] === 255 ? NaN : t.no2[i] / 2; pm25[k] = t.pm25[i] === 255 ? NaN : t.pm25[i] / 2; if (t.zone) zone[k] = t.zone[i];
       k++;
     }
   });
-  var rn = contraste(en, len, k), ra = contraste(ea, len, k), rl = contraste(el, len, k), rnN = contraste(enN, len, k);
+  var rn = contraste(en, len, k), ra = contraste(ea, len, k), rnN = contraste(enN, len, k);
   // feux et grands axes : un arrêt au feu, ou la traversée d'un grand axe, coûte en temps, en stress et en gaz respirés
   var N = nlon.length, sig = new Uint8Array(N), nmaj = new Uint8Array(N), emaj = new Uint8Array(k), MAJ = { primary: 1, secondary: 1, tertiary: 1 };
   sigs.forEach(function (x) { sig[x] = 1; });
   for (var q = 0; q < k; q++) if (MAJ[HWN[hw[q]]]) { emaj[q] = 1; nmaj[eu[q]] = 1; nmaj[ev[q]] = 1; }
-  var g = { N: N, M: k, eu: eu, ev: ev, len: len, hw: hw, acc: acc, n: en, a: ea, l: el, db: edb, rn: rn, ra: ra, rl: rl, nN: enN, dbN: edbN, rnN: rnN,
-    pen: new Float32Array(k), no2: no2, pm25: pm25, lit: lit, zone: zone, accv: accv, avz: avz, sig: sig, nmaj: nmaj, emaj: emaj, nlon: nlon, nlat: nlat, A: {} };
+  var g = { N: N, M: k, eu: eu, ev: ev, len: len, hw: hw, acc: acc, n: en, a: ea, db: edb, rn: rn, ra: ra, nN: enN, dbN: edbN, rnN: rnN,
+    pen: new Float32Array(k), no2: no2, pm25: pm25, zone: zone, accv: accv, avz: avz, sig: sig, nmaj: nmaj, emaj: emaj, nlon: nlon, nlat: nlat, A: {},
+    og: og, od: od, arb: arb, mes: mes, dyn: new Float32Array(k).fill(1), omb: new Float32Array(k), hk: new Float64Array(k) };
+  for (var w = 0; w < k; w++) g.hk[w] = hAr(nlat[eu[w]], nlon[eu[w]], nlat[ev[w]], nlon[ev[w]]);
   majPen(g, NUIT); return g;
 }
 /* Gêne relative, utilisée pour le calcul : 0 pour les rues parmi les 10 % les moins exposées de la zone chargée,
@@ -797,21 +999,22 @@ function astar(A, sa, ta, pe, ban, np, maxC) {
   return steps.reverse();
 }
 function metrics(steps) {
-  var m = { len: 0, t: 0, n: 0, a: 0, l: 0, db: 0, no2: 0, lno2: 0, pm25: 0, lpm: 0, ecl: 0, zs: {}, feux: 0, trav: 0, acc: 0, accpts: [], avion: 0, runs: [] }, cur = null;
+  var m = { len: 0, t: 0, n: 0, a: 0, db: 0, no2: 0, lno2: 0, pm25: 0, lpm: 0, zs: {}, feux: 0, trav: 0, acc: 0, accpts: [], avion: 0, runs: [], omb: 0, mes: 0, neuf: 0 }, cur = null;
   steps.forEach(function (st) {
-    var e = st.e, d = G.len[e] * st.f, n = NUIT ? G.nN[e] : G.n[e], a = G.a[e], l = G.l[e], db = NUIT ? G.dbN[e] : G.db[e], rn = NUIT ? G.rnN[e] : G.rn[e], ra = G.ra[e];
+    var e = st.e, d = G.len[e] * st.f, n = NUIT ? G.nN[e] : G.n[e], a = G.a[e], db = NUIT ? G.dbN[e] : G.db[e], rn = NUIT ? G.rnN[e] : G.rn[e], ra = G.ra[e];
+    m.omb += d * G.omb[e]; if (G.mes[e]) m.mes += d; if (!CONNU.has(G.hk[e])) m.neuf += d;
     if (st.n >= 0 && st.f >= 1) { if (G.sig[st.n]) m.feux++; if (G.nmaj[st.n] && !G.emaj[e]) m.trav++; }
     if (G.accv[e] && st.f > 0.5) { m.acc += G.accv[e]; m.accpts.push({ p: st.p1, n: G.accv[e], c: m.len }); }
     if (G.avz[e] >= 3) m.avion += d;
     // couleur : rouge si la rue est franchement bruyante ou polluée, jaune si elle l'est moyennement, vert sinon
     var tb = tropBruit(rn, db), ta = tropAir(ra, a), band = tb || ta ? 2 : (db >= (NUIT ? 52 : 62) || Math.max(rn, ra) >= 0.5) ? 1 : 0;
-    m.len += d; m.t += st.t; m.n += d * n; m.a += d * a; m.l += d * l; m.db += d * (isNaN(db) ? (NUIT ? 32 : 40) : Math.max(db, NUIT ? 32 : 40));
-    var v2 = G.no2[e], v25 = G.pm25[e]; if (!isNaN(v2)) { m.no2 += d * v2; m.lno2 += d; } if (!isNaN(v25)) { m.pm25 += d * v25; m.lpm += d; } if (G.lit[e]) m.ecl += d;
+    m.len += d; m.t += st.t; m.n += d * n; m.a += d * a; m.db += d * (isNaN(db) ? (NUIT ? 32 : 40) : Math.max(db, NUIT ? 32 : 40));
+    var v2 = G.no2[e], v25 = G.pm25[e]; if (!isNaN(v2)) { m.no2 += d * v2; m.lno2 += d; } if (!isNaN(v25)) { m.pm25 += d * v25; m.lpm += d; }
     var zz = G.zone[e]; if (zz && ZETAT[zz]) { var zr = m.zs[zz] || (m.zs[zz] = { len: 0, pts: [] }); zr.len += d; zr.pts.push(st.p1); }
     if (!cur || cur.b !== band) { cur = { b: band, ll: [st.p0], len: 0, lb: 0, la: 0 }; m.runs.push(cur); }
     cur.ll.push(st.p1); cur.len += d; if (tb) cur.lb += d; if (ta) cur.la += d;
   });
-  if (m.len > 0) ['n', 'a', 'l', 'db', 'ecl'].forEach(function (k) { m[k] /= m.len; });
+  if (m.len > 0) ['n', 'a', 'db', 'omb'].forEach(function (k) { m[k] /= m.len; });
   m.no2 = m.lno2 ? m.no2 / m.lno2 : NaN; m.pm25 = m.lpm ? m.pm25 / m.lpm : NaN;
   return m;
 }
@@ -824,7 +1027,7 @@ async function loadNet(bb, run) {
   if (run !== runId) return false;
   var gk = keys.slice().sort().join('|');
   if (!G || G.k !== gk) { say('wait', T('Préparation du réseau…', 'Preparing the network…')); await sleep(20); G = buildGraph(ts); G.k = gk; }
-  await preparerZones(G, LLZ, NUITL); majPen(G, NUIT);
+  await preparerZones(G, LLZ, NUITL); await majJour(G, LLZ, bb); if (run !== runId) return false; majPen(G, NUIT);
   var N = G.N, X = new Float64Array((N + 2) * 2), cx = Math.cos(LAT0 * Math.PI / 180) * 111320;
   for (var i = 0; i < N; i++) { X[2 * i] = G.nlon[i] * cx; X[2 * i + 1] = G.nlat[i] * 110540; } G.xy = X;
   return true;
@@ -832,7 +1035,8 @@ async function loadNet(bb, run) {
 async function computeRoute() {
   if (!pts.start || !pts.end) return say('ko', T('Indiquez d’abord un départ et une arrivée.', 'Set a start and a destination first.'));
   var run = ++runId; clearRoute(); showCards(true);
-  var cleT = cleTrajet(); if (cleT !== EVCLE) { EVITE.clear(); EVCLE = cleT; AIRB = 1; }   // nouveau trajet : passages évités et renfort air remis à zéro
+  var cleT = cleTrajet(); if (cleT !== EVCLE) { EVITE.clear(); SURP.clear(); FIXE = false; EVCLE = cleT; AIRB = 1; }   // nouveau trajet : passages évités, variantes et renfort air remis à zéro
+  APPRENDRE = false;
   try {
     say('wait', T('Lecture de l’index des données…', 'Reading the data index…')); await ready;
     if (!HWL.length) throw new Error(T('données non chargées (voir le message en haut).', 'data not loaded (see the message above).'));
@@ -848,10 +1052,16 @@ async function computeRoute() {
     if (!s || !e || s.d > 500 || e.d > 500) throw new Error(T('le départ ou l’arrivée est trop loin d’une rue ou d’un chemin accessible (les voies privées sont exclues).', 'the start or destination is too far from an accessible street or path (private roads are excluded).'));
     var sv = v ? snapEdge(v, A) : null;
     if (v && (!sv || sv.d > 500)) throw new Error(T('l’étape est trop loin d’une rue ou d’un chemin accessible.', 'the stop is too far from an accessible street or path.'));
-    var st = v ? [].concat(astar(A, s, sv) || [null], astar(A, sv, e) || [null]) : astar(A, s, e);
-    if (!st || !st.length || st.indexOf(null) >= 0) throw new Error(T('aucun chemin continu et accessible entre ces points.', 'no continuous accessible route between these points.'));
-    routes = [{ m: metrics(st), st: st }];
-    say('', '');
+    var st = chemin(A, s, sv, e, G.pen);
+    if (!st || !st.length) throw new Error(T('aucun chemin continu et accessible entre ces points.', 'no continuous accessible route between these points.'));
+    var m0 = metrics(st), va = await variante(A, s, sv, e, st, m0, bb);
+    if (run !== runId) return;
+    // chemin direct (sans pénalité de bruit ni d'air), jamais affiché : il sert à expliquer le choix en une phrase
+    var un = G.un || (G.un = new Float32Array(G.M).fill(1)), di = TESTS ? null : chemin(A, s, sv, e, un);
+    routes = [{ m: va ? va.m : m0, st: va ? va.st : st, va: !!va, dir: di ? { st: di, m: metrics(di) } : null }];
+    say('', SURP.size && !va ? T('Pas d’autre variante assez calme : voici le trajet le plus calme.', 'No other variant is quiet enough: here is the quietest route.') : '');
+    if (SURP.size && !va) SURP.clear();
+    noterHist(routes[0].st);
     showRoutes(0, true); majURL(); airDuJour(a);
   } catch (er) { if (run === runId) say('ko', er.message); }
 }
@@ -874,21 +1084,236 @@ function proposerEviter(ev) {
   var ll = ev.latlng, p = Math.round(ll.lat * 1e5) / 1e5, q = Math.round(ll.lng * 1e5) / 1e5;
   var div = L.DomUtil.create('div', 'evp');
   div.innerHTML = '<button type="button">' + T('Éviter ce passage', 'Avoid this section') + '</button>'
+    + '<button type="button" class="b2">' + T('L’éviter à l’avenir aussi', 'Avoid it in future too') + '</button>'
     + '<a href="https://www.openstreetmap.org/note/new?lat=' + p + '&lon=' + q + '#map=19/' + p + '/' + q + '" target="_blank" rel="noopener">' + T('Le signaler aussi à OpenStreetMap', 'Also report it to OpenStreetMap') + '</a>';
-  div.querySelector('button').onclick = function () { map.closePopup(); eviterIci(ll); };
+  var bs = div.querySelectorAll('button');
+  bs[0].onclick = function () { map.closePopup(); eviterIci(ll); };
+  bs[1].onclick = function () { map.closePopup(); apprendreIci(ll, true); };
   L.popup({ closeButton: true, autoPan: true }).setLatLng(ll).setContent(div).openOn(map);
 }
-function eviterIci(ll) {
-  var r = routes[0]; if (!r || !r.st) return;
+/* Les bouts de rue du trajet affiché à moins de `rayon` mètres (le long du trajet) du point touché. */
+function troncon(ll, rayon) {
+  var r = routes[0]; if (!r || !r.st) return [];
   var st = r.st, best = -1, bd = Infinity, C = [0];
   st.forEach(function (x, i) {
     var d = L.latLng(x.p0).distanceTo(ll) + L.latLng(x.p1).distanceTo(ll); if (d < bd) { bd = d; best = i; }
     C.push(C[i] + L.latLng(x.p0).distanceTo(x.p1));
   });
-  var c0 = (C[best] + C[best + 1]) / 2, n = 0;
-  st.forEach(function (x, i) { if (x.f > 0 && C[i + 1] >= c0 - 50 && C[i] <= c0 + 50) { EVITE.add(cleArete(G, x.e)); n++; } });
+  var c0 = (C[best] + C[best + 1]) / 2;
+  return st.filter(function (x, i) { return x.f > 0 && C[i + 1] >= c0 - rayon && C[i] <= c0 + rayon; });
+}
+function eviterIci(ll) {
+  troncon(ll, 50).forEach(function (x) { EVITE.add(cleArete(G, x.e)); });
   say('ok', T('Passage évité pour ce trajet. Nouveau calcul…', 'Section avoided for this route. Recalculating…'));
   computeRoute();
+}
+function clicTrajet(ev) { if (APPRENDRE) { L.DomEvent.stopPropagation(ev); return apprendreIci(ev.latlng, false); } proposerEviter(ev); }
+
+/* ---------- Le site apprend : « C'était calme ? » ----------
+   Après un trajet, une seule question. Si la réponse est non, l'utilisateur touche le passage qui l'a gêné : les rues de
+   ce passage (environ 50 m de part et d'autre) coûteront plus cher dans tous les calculs suivants, sur cet appareil.
+   Trois signalements au plus par rue (pénalité x5, x9 puis x13). Le trajet fait est aussi noté dans le journal de calme,
+   ses rues rejoignent les rues déjà parcourues, et sa découverte du jour est comptée comme vue. */
+function apprendreIci(ll, recalcul) {
+  APPRENDRE = false;
+  var xs = troncon(ll, 50); if (!xs.length) return;
+  xs.forEach(function (x) { var h = G.hk[x.e]; APPRIS[h] = Math.min(3, (APPRIS[h] || 0) + 1); });
+  ecrireM('oncyal_appris', APPRIS);
+  say('ok', T('C’est noté : ce passage sera évité dans vos prochains trajets.', 'Noted: this section will be avoided in your future routes.'));
+  var el = $('faitj'); if (el) el.innerHTML = T('Merci. Passage retenu.', 'Thanks. Section remembered.');
+  if (recalcul) computeRoute();
+}
+function trace(r) { var all = []; r.m.runs.forEach(function (x) { x.ll.forEach(function (p) { var q = all[all.length - 1]; if (!q || q[0] !== p[0] || q[1] !== p[1]) all.push(p); }); }); return all; }
+function fait(mesure) {
+  var r = routes[0]; if (!r || r.fait) return; r.fait = true;
+  var m = r.m, all = trace(r), pas = Math.max(1, Math.ceil(all.length / 150)), p = [];
+  for (var i = 0; i < all.length; i += pas) p.push(+all[i][0].toFixed(5), +all[i][1].toFixed(5));
+  var J = lireM('oncyal_journal', []);
+  J.push({ t: Date.now(), km: +(m.len / 1000).toFixed(2), db: +m.db.toFixed(1), no2: isNaN(m.no2) ? null : +m.no2.toFixed(1), pm: isNaN(m.pm25) ? null : +m.pm25.toFixed(1), c: null, mes: mesure == null ? null : mesure, p: p });
+  ecrireM('oncyal_journal', J.slice(-120));
+  r.st.forEach(function (x) { var h = G.hk[x.e]; if (x.f > 0.5 && !CONNU.has(h)) { CONNU.add(h); RUES.h.push(h); RUES.m += G.len[x.e]; } });
+  if (RUES.h.length > 40000) RUES.h = RUES.h.slice(-40000);
+  ecrireM('oncyal_rues', RUES);
+  if (r.dec) { VUS.push(r.dec); VUS = VUS.slice(-600); ecrireM('oncyal_vus', VUS); }
+  var el = $('faitj'); if (!el) return;
+  el.innerHTML = '<span>' + T('Noté dans le journal. C’était calme ?', 'Saved to the journal. Was it quiet?') + '</span><button type="button" onclick="calme(1)">' + T('Oui', 'Yes') + '</button><button type="button" onclick="calme(0)">' + T('Non', 'No') + '</button>';
+}
+function calme(oui) {
+  var J = lireM('oncyal_journal', []); if (J.length) { J[J.length - 1].c = oui ? 1 : 0; ecrireM('oncyal_journal', J); }
+  var el = $('faitj');
+  if (oui) { if (el) el.innerHTML = T('Tant mieux. Bonne journée !', 'Glad to hear it. Have a good day!'); return; }
+  APPRENDRE = true;
+  if (el) el.innerHTML = T('Touchez sur la carte le passage qui vous a gêné.', 'Tap the section that bothered you on the map.');
+}
+
+/* ---------- Le trajet s'explique en une phrase ----------
+   Le trajet choisi est comparé au chemin direct (calculé sans pénalité, jamais affiché) : bruit, air, feux et temps.
+   Les deux rues qui font la différence sont nommées grâce au géocodage inverse de l'IGN (deux points envoyés).
+   S'y ajoutent les raisons du jour : variante, marché contourné, ombre ou soleil recherché, vent. */
+function rueProche(p) {
+  return fetch('https://data.geopf.fr/geocodage/reverse?lon=' + p[1].toFixed(5) + '&lat=' + p[0].toFixed(5) + '&index=address&limit=1')
+    .then(function (r) { return r.json(); }).then(function (j) { var f = j.features && j.features[0]; return (f && f.properties && f.properties.street) || null; }).catch(function () { return null; });
+}
+function tronconPropre(st, autre, poids) {
+  var best = null, cur = null;
+  st.forEach(function (x) {
+    if (x.f <= 0) return; if (autre.has(G.hk[x.e])) { cur = null; return; }
+    if (!cur) cur = { w: 0, pts: [] }; cur.w += poids(x); cur.pts.push(x.p1); if (!best || cur.w > best.w) best = cur;
+  });
+  return best && best.pts[Math.floor(best.pts.length / 2)];
+}
+function expliquer(r) {
+  var el = $('expj'); if (!el) return; var my = runId, notes = [], d = r.dir, mt = JOUR.meteo;
+  if (r.va) notes.push(T('Variante du jour : presque aussi calme que le meilleur trajet, par d’autres rues.', 'Today’s variant: almost as quiet as the best route, along other streets.'));
+  var S = empreintes(r.st);
+  JOUR.marches.forEach(function (k) {
+    var dessus = false; k.es.forEach(function (e) { if (S.has(G.hk[e])) dessus = true; });
+    notes.push(esc(k.n) + T(dessus ? ' : marché en cours, impossible à contourner ici, à traverser à pied.' : ' : marché en cours, évité.', dessus ? ': market in progress, unavoidable here, walk your bike through.' : ': market in progress, avoided.'));
+  });
+  if (JOUR.chaud) notes.push(T('Il fait ' + Math.round(mt ? mt.t : 26) + ' °C : les rues à l’ombre sont préférées.', 'It is ' + Math.round(mt ? mt.t : 26) + ' °C: shaded streets are preferred.'));
+  if (JOUR.froid) notes.push(T('Il fait ' + Math.round(mt ? mt.t : 8) + ' °C : les rues au soleil sont préférées.', 'It is ' + Math.round(mt ? mt.t : 8) + ' °C: sunny streets are preferred.'));
+  if (JOUR.vent) { var vn = VENTS[Math.round(mt.dv / 45) % 8]; notes.push(T('Vent ' + vn[0] + ', ' + Math.round(mt.v) + ' km/h : les rues dans l’axe du vent, mieux aérées, sont préférées.', Math.round(mt.v) + ' km/h ' + vn[1] + ' wind: streets aligned with the wind, better ventilated, are preferred.')); }
+  var phrase = '', gains = '';
+  if (d) {
+    if (part(r.st, empreintes(d.st)) > 0.9) phrase = T('Ici, le chemin direct est déjà le plus calme.', 'Here the direct way is already the quietest.');
+    else {
+      var g = [], ddb = d.m.db - r.m.db, dno = d.m.no2 - r.m.no2, df = d.m.feux - r.m.feux, dmin = Math.round((r.m.t - d.m.t) / 60);
+      if (ddb >= 1) g.push(Math.round(ddb) + T(' dB de moins', ' dB quieter'));
+      if (dno >= 1) g.push(T('NO₂ : ', 'NO₂: ') + '−' + Math.round(dno) + ' µg/m³');
+      if (df >= 2) g.push(df + T(' feux de moins', ' fewer traffic lights'));
+      gains = g.length ? g.join(', ') + (dmin >= 1 ? T(', pour ', ', for ') + dmin + T(' min de plus', ' more min') : '') : T('des rues plus calmes', 'quieter streets');
+      phrase = T('Plutôt que le chemin direct : ', 'Rather than the direct way: ') + gains + '.';
+    }
+  }
+  function ecrire() { el.innerHTML = (phrase ? '<b>' + phrase + '</b>' : '') + notes.map(function (n) { return '<span>' + n + '</span>'; }).join(''); el.hidden = !(phrase || notes.length); }
+  ecrire();
+  if (!d || !gains) return;
+  var pd = tronconPropre(d.st, S, function (x) { var db = NUIT ? G.dbN[x.e] : G.db[x.e]; return G.len[x.e] * Math.max(1, (isNaN(db) ? 40 : db) - 50); });
+  var pc = tronconPropre(r.st, empreintes(d.st), function (x) { return G.len[x.e]; });
+  if (!pd || !pc) return;
+  Promise.all([rueProche(pc), rueProche(pd)]).then(function (n) {
+    if (my !== runId || !n[0] || !n[1] || n[0] === n[1]) return;
+    phrase = T('Par ' + esc(n[0]) + ' plutôt que par ' + esc(n[1]) + ' : ', 'Via ' + esc(n[0]) + ' rather than ' + esc(n[1]) + ': ') + gains + '.'; ecrire();
+  });
+}
+
+/* ---------- La découverte du jour (curiosites_06.py) ----------
+   Parmi les curiosités à moins de 40 m du trajet (œuvres d'art, points de vue, lieux historiques, fontaines), une seule
+   est mise en avant, de préférence jamais vue ; elle change avec les variantes et les jours. */
+var CURN = [['œuvre d’art', 'artwork'], ['point de vue', 'viewpoint'], ['lieu historique', 'historic place'], ['fontaine', 'fountain'], ['curiosité', 'sight']];
+function decouverte(all, r) {
+  var my = runId;
+  curio().then(function (d) {
+    if (my !== runId) return;
+    var cx = Math.cos(all[0][0] * Math.PI / 180) * 111320, bb = L.latLngBounds(all).pad(0.02), P = all.map(function (q) { return [q[1] * cx, q[0] * 110540]; }), prox = [], vus = new Set(VUS);
+    d.p.forEach(function (q) {
+      if (!bb.contains([q[0], q[1]])) return;
+      var x = q[1] * cx, y = q[0] * 110540, best = Infinity;
+      for (var i = 1; i < P.length; i++) {
+        var ax = P[i - 1][0], ay = P[i - 1][1], dx = P[i][0] - ax, dy = P[i][1] - ay, l2 = dx * dx + dy * dy, t = l2 ? cl(((x - ax) * dx + (y - ay) * dy) / l2, 0, 1) : 0;
+        var dd = Math.hypot(x - ax - t * dx, y - ay - t * dy); if (dd < best) best = dd;
+      }
+      if (best <= 40) prox.push(q);
+    });
+    if (!prox.length) return;
+    var neuves = prox.filter(function (q) { return !vus.has(q[0] + ',' + q[1]); }), choix = neuves.length ? neuves : prox;
+    var q = choix[Math.floor(Date.now() / 86400000) % choix.length];
+    r.dec = q[0] + ',' + q[1];
+    var genre = T(CURN[q[2]][0], CURN[q[2]][1]), det = q[4] ? ' (' + esc(q[4]) + ')' : '';
+    routeGroup.addLayer(L.marker([q[0], q[1]], { keyboard: false, icon: L.divIcon({ className: '', html: '<div class="decm">✦</div>', iconSize: [24, 24], iconAnchor: [12, 12] }) })
+      .bindTooltip(esc(q[3]) + det, { direction: 'top', offset: [0, -10] }));
+    var el = $('decj'); if (!el) return;
+    el.innerHTML = '<i>✦</i><div>' + T('À voir aujourd’hui : ', 'To see today: ') + '<b>' + esc(q[3]) + '</b>' + det
+      + '<small>' + genre + (neuves.length ? T(' · jamais vu sur vos trajets', ' · never seen on your routes') : '') + (prox.length > 1 ? ' · ' + (prox.length - 1) + T(prox.length > 2 ? ' autres sur le trajet' : ' autre sur le trajet', prox.length > 2 ? ' more on the route' : ' more on the route') : '') + '</small></div>';
+    el.hidden = false;
+  });
+}
+
+/* ---------- Le vrai bruit, mesuré en roulant ----------
+   Le micro du téléphone mesure le niveau sonore chaque seconde pendant le trajet, la position GPS le situe. Un téléphone
+   n'est pas un sonomètre étalonné : la valeur en dB est indicative, mais les écarts d'une rue à l'autre sont fiables.
+   À l'arrêt : la trace est colorée du plus calme (vert) au plus bruyant (rouge) et le passage le plus bruyant peut être
+   retenu pour être évité à l'avenir. Le son n'est ni enregistré ni envoyé : seul un niveau par seconde est gardé. */
+var SONO = null;
+async function sonometre() {
+  if (SONO) return arreterSono();
+  if (!navigator.mediaDevices || !navigator.geolocation) return say('ko', T('La mesure du bruit n’est pas disponible sur cet appareil.', 'Noise measurement is not available on this device.'));
+  try {
+    var flux = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
+    var ctx = new (window.AudioContext || window.webkitAudioContext)(), an = ctx.createAnalyser(); an.fftSize = 2048;
+    ctx.createMediaStreamSource(flux).connect(an);
+    var buf = new Float32Array(an.fftSize), pos = null, pts = [];
+    var veille = navigator.wakeLock ? await navigator.wakeLock.request('screen').catch(function () { return null; }) : null;
+    var wid = navigator.geolocation.watchPosition(function (p) { pos = p.coords.accuracy < 60 ? [p.coords.latitude, p.coords.longitude] : null; }, function () {}, { enableHighAccuracy: true, maximumAge: 2000 });
+    var minuteur = setInterval(function () {
+      an.getFloatTimeDomainData(buf); var s = 0; for (var i = 0; i < buf.length; i++) s += buf[i] * buf[i];
+      var db = 10 * Math.log10(s / buf.length + 1e-12) + 94;                 // niveau indicatif : pleine échelle supposée à 94 dB
+      if (pos && isFinite(db)) pts.push([pos[0], pos[1], db]);
+      var b = $('sonob'); if (b) b.textContent = T('Arrêter la mesure · ', 'Stop measuring · ') + Math.round(db) + ' dB';
+    }, 1000);
+    SONO = { flux: flux, ctx: ctx, wid: wid, minuteur: minuteur, veille: veille, pts: pts };
+    say('ok', T('Mesure en cours : gardez le téléphone à l’air libre, pas dans une poche.', 'Measuring: keep the phone in the open, not in a pocket.'));
+  } catch (e) { say('ko', T('Micro refusé ou indisponible : la mesure n’a pas démarré.', 'Microphone denied or unavailable: measurement did not start.')); }
+}
+function arreterSono() {
+  var s = SONO; if (!s) return; SONO = null;
+  clearInterval(s.minuteur); navigator.geolocation.clearWatch(s.wid); s.flux.getTracks().forEach(function (t) { t.stop(); }); s.ctx.close(); if (s.veille) s.veille.release();
+  var b = $('sonob'); if (b) b.textContent = T('Mesurer le bruit en roulant', 'Measure noise while riding');
+  var P = s.pts; if (P.length < 20) return say('ko', T('Mesure trop courte (moins de 20 secondes avec une position GPS).', 'Measurement too short (under 20 seconds with a GPS fix).'));
+  var tri = P.map(function (p) { return p[2]; }).sort(function (a, b) { return a - b; }), q1 = tri[Math.floor(tri.length / 3)], q2 = tri[Math.floor(2 * tri.length / 3)];
+  var e = 0; P.forEach(function (p) { e += Math.pow(10, p[2] / 10); }); var moy = 10 * Math.log10(e / P.length);
+  P.forEach(function (p) { routeGroup.addLayer(L.circleMarker([p[0], p[1]], { radius: 4, stroke: false, fillColor: BC[p[2] < q1 ? 0 : p[2] < q2 ? 1 : 2], fillOpacity: 0.9, interactive: false })); });
+  var best = 0, bi = 0; for (var i = 0; i + 10 <= P.length; i++) { var w = 0; for (var k = i; k < i + 10; k++) w += Math.pow(10, P[k][2] / 10); if (w > best) { best = w; bi = i + 5; } }
+  var pire = L.latLng(P[bi][0], P[bi][1]), div = L.DomUtil.create('div', 'evp');
+  div.innerHTML = T('Passage le plus bruyant mesuré : ', 'Loudest section measured: ') + Math.round(10 * Math.log10(best / 10)) + ' dB<button type="button">' + T('L’éviter à l’avenir', 'Avoid it in future') + '</button>';
+  div.querySelector('button').onclick = function () { map.closePopup(); apprendreIci(pire, false); };
+  L.popup({ closeButton: true, autoPan: true }).setLatLng(pire).setContent(div).openOn(map);
+  say('ok', T('Bruit mesuré : ', 'Measured noise: ') + Math.round(moy) + T(' dB en moyenne (valeur indicative, téléphone non étalonné).', ' dB on average (indicative, uncalibrated phone).'));
+  if (routes[0] && !routes[0].fait) fait(+moy.toFixed(1));
+}
+
+/* ---------- Journal de calme ----------
+   Chaque trajet marqué « fait » y entre avec sa distance, son bruit et son air. Le journal compare les semaines entre
+   elles (jamais avec un trajet plus rapide), compte les rues différentes parcourues et dessine la carte personnelle. */
+function lundi(t) { var d = new Date(t); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - (d.getDay() + 6) % 7); return d.getTime(); }
+function ouvrirJournal(on) {
+  var el = $('jr'); el.hidden = !on; $('jrOpen').setAttribute('aria-expanded', on); $('br').style.visibility = on ? 'hidden' : '';
+  if (!on) return $('jrOpen').focus();
+  var J = lireM('oncyal_journal', []), S = {}, sem = [], h = '';
+  J.forEach(function (x) { var k = lundi(x.t), s = S[k] || (S[k] = { k: k, n: 0, km: 0, db: 0, no2: 0, kn: 0, oui: 0, rep: 0 }); s.n++; s.km += x.km; s.db += x.km * x.db; if (x.no2 != null) { s.no2 += x.km * x.no2; s.kn += x.km; } if (x.c != null) { s.rep++; s.oui += x.c; } });
+  sem = Object.keys(S).map(function (k) { return S[k]; }).sort(function (a, b) { return b.k - a.k; }).slice(0, 6);
+  sem.forEach(function (s) { s.db /= s.km || 1; s.no2 = s.kn ? s.no2 / s.kn : null; });
+  var c = S[lundi(Date.now())], p = S[lundi(Date.now() - 7 * 86400000)];
+  if (!J.length) h += '<p>' + T('Aucun trajet pour l’instant. Après un trajet, touchez « J’ai fait ce trajet » dans le résumé : il sera noté ici.', 'No rides yet. After a ride, tap “I rode this route” in the summary: it will be logged here.') + '</p>';
+  else {
+    h += '<p class="tete">' + (c ? T('Cette semaine : ', 'This week: ') + '<b>' + Math.round(c.db) + ' dB</b>' + T(' en moyenne sur ', ' on average over ') + fmt(c.km, 1) + ' km (' + c.n + T(c.n > 1 ? ' trajets)' : ' trajet)', c.n > 1 ? ' rides)' : ' ride)')
+        + (p ? (Math.abs(c.db - p.db) < 0.5 ? T(', comme la semaine dernière.', ', same as last week.') : ', ' + fmt(Math.abs(c.db - p.db), 0) + (c.db < p.db ? T(' dB de moins que la semaine dernière.', ' dB quieter than last week.') : T(' dB de plus que la semaine dernière.', ' dB louder than last week.'))) : '.')
+      : T('Pas encore de trajet cette semaine.', 'No rides yet this week.')) + '</p>';
+    h += '<table><tr><th>' + T('Semaine du', 'Week of') + '</th><th>' + T('Trajets', 'Rides') + '</th><th>km</th><th>' + T('Bruit', 'Noise') + '</th><th>NO₂</th><th>' + T('Calme ?', 'Quiet?') + '</th></tr>'
+      + sem.map(function (s) { return '<tr><td>' + new Date(s.k).toLocaleDateString(LANG === 'en' ? 'en-GB' : 'fr-FR', { day: 'numeric', month: 'short' }) + '</td><td>' + s.n + '</td><td>' + fmt(s.km, 1) + '</td><td>' + Math.round(s.db) + ' dB</td><td>' + (s.no2 == null ? '—' : Math.round(s.no2)) + '</td><td>' + (s.rep ? s.oui + '/' + s.rep : '—') + '</td></tr>'; }).join('') + '</table>';
+    h += '<p>' + T('Rues différentes parcourues : ', 'Different streets ridden: ') + '<b>' + fmt(RUES.m / 1000, 1) + ' km</b> <button type="button" class="lien" onclick="maCarte()">' + T('Voir ma carte', 'Show my map') + '</button></p>';
+  }
+  var na = Object.keys(APPRIS).length;
+  h += '<p>' + T('Bouts de rue retenus comme gênants : ', 'Street segments remembered as bothersome: ') + '<b>' + na + '</b>' + (na ? ' <button type="button" class="lien" onclick="oublierAppris()">' + T('Les oublier', 'Forget them') + '</button>' : '') + '</p>';
+  h += '<h3>' + T('Trajet du jour', 'Route of the day') + '</h3>'
+    + '<label class="regl"><input type="checkbox" id="rgV"' + (REGL.varier ? ' checked' : '') + ' onchange="regler()"> ' + T('Varier mes trajets habituels d’un jour à l’autre', 'Vary my usual routes from day to day') + '</label>'
+    + '<label class="regl">' + T('Détour accepté : ', 'Accepted detour: ') + '<select id="rgD" onchange="regler()">' + [2, 4, 6, 10].map(function (v) { return '<option value="' + v + '"' + (REGL.detour === v ? ' selected' : '') + '>' + v + ' min</option>'; }).join('') + '</select></label>'
+    + '<p><button type="button" class="lien" onclick="toutEffacer()">' + T('Effacer le journal, les rues parcourues et les variantes', 'Erase the journal, ridden streets and variants') + '</button></p>'
+    + '<p class="note">' + T('Tout ceci reste sur cet appareil : rien n’est envoyé.', 'All of this stays on this device: nothing is sent.') + '</p>';
+  $('jrc').innerHTML = h; el.querySelector('.x').focus();
+}
+function regler() { REGL.varier = $('rgV').checked; REGL.detour = +$('rgD').value; ecrireM('oncyal_regl', REGL); }
+function oublierAppris() { APPRIS = {}; ecrireM('oncyal_appris', APPRIS); ouvrirJournal(true); if (pts.start && pts.end) computeRoute(); }
+function toutEffacer() {
+  if (!window.confirm(T('Effacer le journal, les rues parcourues, les découvertes vues et les variantes ? C’est définitif.', 'Erase the journal, ridden streets, seen sights and variants? This cannot be undone.'))) return;
+  ['oncyal_journal', 'oncyal_rues', 'oncyal_vus', 'oncyal_hist'].forEach(function (k) { try { localStorage.removeItem(k); } catch (e) {} });
+  RUES = { h: [], m: 0 }; CONNU = new Set(); VUS = []; ouvrirJournal(true);
+}
+function maCarte() {
+  var J = lireM('oncyal_journal', []), tout = []; hl.clearLayers();
+  J.forEach(function (x) { var ll = []; for (var i = 0; i + 1 < (x.p || []).length; i += 2) ll.push([x.p[i], x.p[i + 1]]); if (ll.length > 1) { hl.addLayer(L.polyline(ll, { color: '#16a0e6', weight: 3, opacity: 0.55, interactive: false })); tout = tout.concat(ll); } });
+  ouvrirJournal(false);
+  if (tout.length) map.fitBounds(L.latLngBounds(tout), { padding: [40, 40] });
 }
 function oublierEvites() { EVITE.clear(); say('', T('Passages évités réinitialisés.', 'Avoided sections reset.')); if (pts.start && pts.end) computeRoute(); }
 
@@ -903,7 +1328,7 @@ function montrerEtape(on) {
    Chaque cas recalcule un trajet et vérifie une règle : aucune voie interdite (hippodrome) ni privée, longueur et bruit
    plausibles, passage par l'étape, respect d'un passage évité. Résultat affiché dans un tableau. */
 async function lancerTests() {
-  var R = [], t0g = performance.now(), garde = new Set(EVITE);
+  var R = [], t0g = performance.now(), garde = new Set(EVITE); TESTS = true;
   async function trajet(a, b, v) {
     clearAll(); if (v) { montrerEtape(true); pts.via = L.latLng(v[0], v[1]); }
     pts.start = L.latLng(a[0], a[1]); pts.end = L.latLng(b[0], b[1]);
@@ -945,6 +1370,16 @@ async function lancerTests() {
     await trajet([43.6950, 7.2650], [43.7100, 7.2850]);
     cas('Éviter ce passage : remis à zéro pour un nouveau trajet', EVITE.size === 0, EVITE.size + ' passage(s) encore évité(s)');
   }
+  cas('Lumière : sortie du calcul (pénalité à 4 critères : bruit et air, relatifs et absolus)', penalite.length === 4 && PEN.rel.l === undefined, 'penalite(' + penalite.length + ' paramètres)');
+  var r6 = await trajet([43.6950, 7.2650], [43.7190, 7.2760]);
+  if (r6) {
+    var base = empreintes(r6.st), dbBase = r6.m.db, tBase = r6.m.t; base.forEach(function (h) { SURP.add(h); });
+    await computeRoute(); var r7 = routes[0], commun = r7 ? part(r7.st, base) : 1;
+    cas('Surprends-moi : variante différente, presque aussi calme, ou retour au plus calme', r7 && (r7.va ? commun < 0.9 && r7.m.db <= dbBase + 2.5 && r7.m.t <= tBase + REGL.detour * 60 : commun > 0.9),
+      r7 ? (r7.va ? Math.round(100 * (1 - commun)) + ' % de rues différentes, ' + (r7.m.db - dbBase >= 0 ? '+' : '') + (r7.m.db - dbBase).toFixed(1) + ' dB, ' + Math.round((r7.m.t - tBase) / 60) + ' min de plus' : 'aucune variante assez calme') : 'pas de trajet');
+    cas('Ombre : chaque rue a une part d’ombre calculée (0 à 1)', G.omb.length === G.M && G.og.some(function (x) { return x > 0; }), Math.round(100 * G.og.filter(function (x) { return x > 0; }).length / G.M) + ' % des rues ont un bâtiment à gauche');
+  }
+  SURP.clear(); TESTS = false;
   EVITE = garde; clearAll();
   var ok = R.filter(function (x) { return x.ok; }).length;
   var el = document.createElement('div'); el.className = 'card tests';
@@ -1138,9 +1573,10 @@ function airDuJour(ll) {
     if (my !== runId || !$('airj')) return;
     var EN = { 'Bon': 'Good', 'Moyen': 'Fair', 'Dégradé': 'Degraded', 'Mauvais': 'Poor', 'Très mauvais': 'Very poor', 'Extrêmement mauvais': 'Extremely poor' };
     var q = LANG === 'en' ? (EN[x.q] || x.q) : x.q, el = $('airj');
-    var hh = x.h || {}, no2 = hh.no2 && hh.no2.concentration, pm = hh['pm2.5'] && hh['pm2.5'].concentration;
+    var hh = x.h || {}, no2 = hh.no2 && hh.no2.concentration, pm = hh['pm2.5'] && hh['pm2.5'].concentration, o3 = hh.o3 && hh.o3.concentration;
     el.innerHTML = '<i style="background:' + x.c + '"></i>' + T('Air aujourd’hui à ', 'Air today in ') + x.nom + T(' : ', ': ') + '<b>' + q + '</b><small>AtmoSud</small>'
-      + (no2 != null ? '<span class="hr">' + T('À cette heure, au départ : NO₂ ', 'This hour, at the start: NO₂ ') + Math.round(no2) + (pm != null ? T(' · PM2,5 ', ' · PM2.5 ') + Math.round(pm) : '') + ' µg/m³ <small>' + T('modèle AZUR Heure', 'AZUR hourly model') + '</small></span>' : '');
+      + (no2 != null ? '<span class="hr">' + T('À cette heure, au départ : NO₂ ', 'This hour, at the start: NO₂ ') + Math.round(no2) + (pm != null ? T(' · PM2,5 ', ' · PM2.5 ') + Math.round(pm) : '') + (o3 != null ? T(' · ozone ', ' · ozone ') + Math.round(o3) : '') + ' µg/m³ <small>' + T('modèle AZUR Heure', 'AZUR hourly model') + '</small></span>' : '')
+      + (o3 != null && o3 >= 120 ? '<span class="hr">' + T('Ozone élevé : il est le même dans toutes les rues, roulez sans forcer.', 'High ozone: it is the same in every street, ride gently.') + '</span>' : '');
     el.hidden = false;
     var icairh = hh.icairh && hh.icairh.indicateur, episode = /Mauvais|mauvais/.test(x.q) || (icairh != null && icairh >= 4);
     if (episode && AIRB === 1) { AIRB = 1.5; say('ko', T('Épisode de pollution : le calcul évite encore plus les rues polluées. Nouveau calcul…', 'Pollution episode: the route now avoids polluted streets even more. Recalculating…')); computeRoute(); return; }
@@ -1188,18 +1624,27 @@ function showRoutes(sel) {
   var db = m.db, sB = NUIT ? [45, 52, 62] : [53, 60, 68], motB = db < sB[0] ? T('calme', 'quiet') : db < sB[1] ? T('modéré', 'moderate') : db < sB[2] ? T('bruyant', 'noisy') : T('très bruyant', 'very noisy');
   var air = isNaN(m.no2) ? T('note ', 'score ') + Math.round(100 * m.a) + '/100'
     : 'NO₂ ' + Math.round(m.no2) + (isNaN(m.pm25) ? '' : T(' · PM2,5 ', ' · PM2.5 ') + Math.round(m.pm25)) + ' µg/m³';
-  var lum = Math.round(100 * m.l) + '/100 · ' + Math.round(100 * m.ecl) + T(' % de rues éclairées', ' % lit streets');
+  var mt = JOUR.meteo, ombre = JOUR.jour ? '<div class="arr">' + T('À l’ombre sur ', 'In the shade for ') + Math.round(100 * m.omb) + T(' % du trajet à cette heure', ' % of the route at this hour') + (mt ? ' · ' + Math.round(mt.t) + ' °C' : '') + '</div>' : '';
   var ligne = function (i, nom, val, rep) { return '<div class="ln">' + ico(i) + '<div><b>' + nom + '</b> ' + val + '<small>' + rep + '</small></div></div>'; };
   $('sum').innerHTML = '<div class="km">' + fmt(m.len / 1000, 1) + ' km</div>'
     + ligne('sound', T('Bruit', 'Noise'), Math.round(db) + ' dB · ' + motB, NUIT ? T('Bruit de nuit (22 h – 6 h) · repère OMS : 45 dB', 'Night noise (10 pm – 6 am) · WHO guideline: 45 dB') : T('Moyenne sur 24 h · repère OMS : 53 dB', '24 h average · WHO guideline: 53 dB'))
     + ligne('air', T('Air', 'Air'), air, T('Moyenne annuelle · repères OMS : 10 et 5 µg/m³', 'Annual average · WHO guidelines: 10 and 5 µg/m³'))
-    + ligne('light', T('Lumière', 'Light'), lum, NUITL ? T('Soleil couché : prise en compte dans le calcul', 'After sunset: taken into account') : T('De jour : non prise en compte dans le calcul', 'Daytime: not taken into account'))
+    + '<div id="expj" class="expj" hidden></div>'
     + '<div class="arr">' + T('Arrêts : ', 'Stops: ') + m.feux + T(m.feux > 1 ? ' feux' : ' feu', m.feux > 1 ? ' traffic lights' : ' traffic light') + ' · ' + m.trav + T(m.trav > 1 ? ' traversées de grands axes' : ' traversée de grand axe', m.trav > 1 ? ' major road crossings' : ' major road crossing') + '</div>'
     + (m.acc ? '<div class="arr">' + T('Accidents de vélo recensés sur le trajet : ', 'Bike accidents recorded on the route: ') + m.acc + ' (2020-2024)</div>' : '')
     + (m.avion > 100 ? '<div class="arr">' + T('Sous les avions sur ', 'Under flight paths for ') + fmt(m.avion / 1000, 1) + T(' km (bruit des avions inclus)', ' km (aircraft noise included)') + '</div>' : '')
+    + ombre
+    + (m.mes > 50 ? '<div class="arr">' + T('Bruit corrigé par des mesures d’habitants sur ', 'Noise corrected by residents’ measurements for ') + Math.round(m.mes) + ' m (NoiseCapture)</div>' : '')
+    + (CONNU.size && m.neuf > 100 ? '<div class="arr">' + T('Rues nouvelles pour vous : ', 'Streets new to you: ') + fmt(m.neuf / 1000, 1) + ' km</div>' : '')
+    + '<div id="decj" class="decj" hidden></div>'
     + '<div id="zonj" class="zonj" hidden></div><div id="airj" class="airj" hidden></div><div id="poij" class="poij" hidden></div>'
-    + '<div class="app"><button class="go" id="dlb" type="button" onclick="voletDl()" aria-expanded="false" aria-controls="dl">' + T('Télécharger la trace', 'Download the track') + '</button>'
+    + '<div class="app"><button class="go" type="button" onclick="surprendre()">' + T('Surprends-moi', 'Surprise me') + '</button>'
+    + (r.va || SURP.size ? '<button type="button" onclick="plusCalme()">' + T('Le plus calme', 'Quietest') + '</button>' : '')
     + '<button type="button" onclick="partager()">' + T('Partager', 'Share') + '</button></div>'
+    + '<div class="app"><button type="button" class="sec" onclick="fait()">' + T('J’ai fait ce trajet', 'I rode this route') + '</button>'
+    + '<button type="button" class="sec" id="sonob" onclick="sonometre()">' + T(SONO ? 'Arrêter la mesure' : 'Mesurer le bruit en roulant', SONO ? 'Stop measuring' : 'Measure noise while riding') + '</button></div>'
+    + '<div id="faitj" class="faitj"></div>'
+    + '<div class="app"><button type="button" class="sec" id="dlb" onclick="voletDl()" aria-expanded="false" aria-controls="dl">' + T('Télécharger la trace', 'Download the track') + '</button></div>'
     + '<div class="sig">' + T('Un passage impossible ? Touchez-le sur la carte pour l’éviter.', 'An impassable section? Tap it on the map to avoid it.')
     + (EVITE.size ? ' <a href="#" onclick="oublierEvites();return false">' + EVITE.size + T(EVITE.size > 1 ? ' passages évités · réinitialiser' : ' passage évité · réinitialiser', EVITE.size > 1 ? ' avoided sections · reset' : ' avoided section · reset') + '</a>' : '') + '</div>'
     + '<div id="dl" class="dl" hidden>'
@@ -1207,14 +1652,14 @@ function showRoutes(sel) {
     + '<a class="fm" href="' + u.kml + '" download="oncyal-trajet.kml"><b>KML</b><span>Google My Maps, Google Earth, Organic Maps</span></a>'
     + '<a class="fm" href="' + u.geojson + '" download="oncyal-trajet.geojson"><b>GeoJSON</b><span>uMap, QGIS, ' + T('outils de cartographie', 'mapping tools') + '</span></a>'
     + '</div>';
-  $('sum').hidden = false;
+  $('sum').hidden = false; expliquer(r);
   var narrow = window.innerWidth <= 640, opt = { paddingTopLeft: narrow ? [20, 80] : [40, 80], paddingBottomRight: narrow ? [20, 240] : [Math.min(300, window.innerWidth * 0.3), 50] };
   var go = function () {
     if (my !== runId || !routes.length) return;
     var cas = L.polyline(all, { color: '#000', weight: 11, opacity: 0.5, lineJoin: 'round', lineCap: 'round' }); routeGroup.addLayer(cas);
-    var runs = r.m.runs.map(function (x) { var p = L.polyline(x.ll, { color: BC[x.b], weight: 6, opacity: 0.95, lineJoin: 'round', lineCap: 'round' }); p.on('click', proposerEviter); routeGroup.addLayer(p); return p; });
-    cas.on('click', proposerEviter);
-    fuse(r, runs, cas, function () { if (my === runId) { alertes(r); avertZones(r); pointsNoirs(r); pointsUtiles(all, r); } });
+    var runs = r.m.runs.map(function (x) { var p = L.polyline(x.ll, { color: BC[x.b], weight: 6, opacity: 0.95, lineJoin: 'round', lineCap: 'round' }); p.on('click', clicTrajet); routeGroup.addLayer(p); return p; });
+    cas.on('click', clicTrajet);
+    fuse(r, runs, cas, function () { if (my === runId) { alertes(r); avertZones(r); pointsNoirs(r); pointsUtiles(all, r); decouverte(all, r); } });
   };
   if (REDUCED) { map.fitBounds(L.latLngBounds(all), opt); return go(); }
   setTimeout(function () {

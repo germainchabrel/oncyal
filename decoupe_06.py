@@ -57,6 +57,11 @@ def ecrire_tuile(chemin, e):
         np.minimum(e.acc_velo.values if "acc_velo" in e else np.zeros(m), 254).astype(np.uint8),
         # zone du plan d'exposition au bruit des aérodromes (avions_06.py) : 0 aucune, 1 = D ... 4 = A
         (e.avion.values if "avion" in e else np.zeros(m)).astype(np.uint8),
+        # ombre (ombre_06.py) : rapport hauteur / distance des bâtiments à gauche et à droite (x 10), arbres ;
+        # puis 1 si le bruit a été corrigé par des mesures NoiseCapture (mesures_06.py)
+        q(e.omb_g.values if "omb_g" in e else np.zeros(m), 10), q(e.omb_d.values if "omb_d" in e else np.zeros(m), 10),
+        (e.arbres.values if "arbres" in e else np.zeros(m)).astype(np.uint8),
+        (e.mesure.values if "mesure" in e else np.zeros(m)).astype(np.uint8),
     ]
     corps = b"".join(b.tobytes() for b in blocs)
     # compressé en gzip : Cloudflare ne compresse pas les fichiers binaires, la page les décompresse elle-même
@@ -90,6 +95,8 @@ def lire_tuile(chemin):
         t["feux"] = lire("u1", n)
     if p + 2 * m <= len(d):
         t["acc_velo"] = lire("u1", m); t["avion"] = lire("u1", m)
+    if p + 4 * m <= len(d):
+        t["omb_g"] = lire("u1", m) / 10.0; t["omb_d"] = lire("u1", m) / 10.0; t["arbres"] = lire("u1", m); t["mesure"] = lire("u1", m)
     t["oneway"] = (t["flags"] & 3).astype(int) - 1
     t["lit"] = ((t["flags"] >> 2) & 3).astype(int) - 1
     t["noise_src"] = (t["flags"] >> 4) & 1
