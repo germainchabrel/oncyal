@@ -8,8 +8,12 @@ data/
 *.tif
 describe_*.xml
 
-# Résultats intermédiaires du pipeline (régénérés par mise_a_jour_06.py) ; site/tuiles reste versionné
+# Résultats intermédiaires du pipeline (régénérés par mise_a_jour.py). Depuis novembre 2026 ils vivent hors du projet
+# (dossier « oncyal-donnees » du dossier personnel, voir config.py), tout comme les données sources.
 out/
+
+# Données du site : plusieurs centaines de Mo, régénérées par assemble.py, copiées à la publication (voir mise_a_jour.py)
+site/tuiles/
 
 # Sauvegardes manuelles
 sauvegardes/

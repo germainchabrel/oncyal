@@ -1,11 +1,12 @@
 """
-Diagnostic du bruit : lit out/reseau_06.csv.gz (ne modifie rien).
-Lancer depuis le dossier du projet :  python diag_bruit.py
+Diagnostic du bruit d'un département (ONCYAL_DEP, « 06 » par défaut) : lit son réseau, ne modifie rien.
+Lancer :  python diag_bruit.py
 """
 import pandas as pd
-from prepare_06 import HW
+import config
+from prepare import HW
 
-e = pd.read_csv("out/reseau_06.csv.gz")
+e = pd.read_csv(config.FICHIER)
 e["type"] = [HW[i] for i in e.hw.values]
 e["officiel"] = e.noise_src == 1
 
