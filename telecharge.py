@@ -10,7 +10,11 @@ Télécharge les données sources d'un ou plusieurs départements (ce qui est d�
   - air : moyenne annuelle de NO2 de l'agence régionale, quand elle publie ses valeurs (licence ODbL) :
           AtmoSud (WCS, 25 m)                                                             -> data/atmosud/<code>
           Atmo Auvergne-Rhône-Alpes, Airparif, Atmo Nouvelle-Aquitaine, Air Pays de la Loire
-          (WCS à 10 ou 12,5 m, téléchargé à 25 m), Atmo Normandie (fichier GeoTIFF à 25 m) -> data/air/<code>
+          (WCS à 10 ou 12,5 m, téléchargé à 25 m), Atmo Normandie (fichier GeoTIFF à 25 m),
+          Atmo Bourgogne-Franche-Comté (WCS, carte régionale à 500 m)                    -> data/air/<code>
+          et, pour les agences qui ne publient que l'image de leur carte (Atmo Hauts-de-France, Atmo Grand Est,
+          Air Breizh, Lig'Air, Atmo Occitanie, Qualitair Corse), valeurs relues d'après les couleurs
+          (voir air_couleurs.py)                                                          -> data/air/<code>
 Les accidents (ONISR) et les plans d'exposition au bruit des aérodromes (DGAC) sont des fichiers nationaux,
 déjà dans data/accidents et data/avions.
 Lancer :  python telecharge.py 83 13        (--osm-neuf pour reprendre la dernière extraction OSM)
@@ -172,6 +176,17 @@ def lire_tiff(octets):
     return np.squeeze(tifffile.imread(io.BytesIO(octets))).astype(np.float32)
 
 
+def georef(page):
+    """Coin haut-gauche (x, y) et taille de case d'une page GeoTIFF, que le fichier donne un point d'attache et une
+    échelle (cas courant) ou une matrice de transformation (GeoServer en EPSG:3035)."""
+    g = page.geotiff_tags
+    if "ModelPixelScale" in g:
+        pas, tp = float(g["ModelPixelScale"][0]), g["ModelTiepoint"]
+        return float(tp[3]) - float(tp[0]) * pas, float(tp[4]) + float(tp[1]) * pas, pas
+    m = g["ModelTransformation"]
+    return float(m[0][3]), float(m[1][3]), float(m[0][0])
+
+
 def propre(a):
     """Valeurs « pas de donnée » et valeurs absurdes (quelques cases à plusieurs centaines de µg/m3 chez Atmo AURA) retirées."""
     a = a.astype(np.float32)
@@ -256,10 +271,7 @@ def air_tif(dep, nom, c):
     os.makedirs(dos, exist_ok=True)
     chemin = air_tif_region(nom, c)
     with tifffile.TiffFile(chemin) as t:
-        p = t.pages[0]
-        pas = float(p.geotiff_tags["ModelPixelScale"][0])
-        tp = p.geotiff_tags["ModelTiepoint"]
-        gx0, gy1 = float(tp[3]) - float(tp[0]) * pas, float(tp[4]) + float(tp[1]) * pas
+        gx0, gy1, pas = georef(t.pages[0])
     # le fichier est compressé en LZW : tifffile ne le lit qu'avec le module imagecodecs, Pillow le lit seul
     from PIL import Image
     Image.MAX_IMAGE_PIXELS = None
@@ -285,8 +297,33 @@ def air(dep):
         atmosud(dep)
     elif nom and "wcs" in c:
         air_wcs(dep, nom, c)
-    elif nom:
+    elif nom and "tif" in c:
         air_tif(dep, nom, c)
+    elif nom and "wcs_entier" in c:
+        air_wcs_entier(dep, nom, c)
+    elif nom:
+        import air_couleurs
+        air_couleurs.telecharger(dep, nom, c)
+
+
+def air_wcs_entier(dep, nom, c):
+    """Carte régionale à maille large (Atmo Bourgogne-Franche-Comté : 500 m), téléchargée entière ; le géoréférencement
+    est lu dans le fichier (la projection EPSG:3035 inverse l'ordre des axes dans les réponses du serveur)."""
+    import config, logging, tifffile
+    dos = config.air_dir(dep)
+    if os.path.exists(f"{dos}/no2_moyan.npy"):
+        return
+    os.makedirs(dos, exist_ok=True)
+    logging.getLogger("tifffile").setLevel(logging.ERROR)
+    r = http(c["wcs_entier"], params={"service": "WCS", "version": "2.0.1", "request": "GetCoverage", "coverageId": c["couche"], "format": "image/tiff"}, timeout=600)
+    with tifffile.TiffFile(io.BytesIO(r.content)) as t:
+        p = t.pages[0]
+        x0, y1, pas = georef(p)
+        arr = propre(np.squeeze(p.asarray()))
+    np.save(f"{dos}/no2_moyan.npy", arr)
+    json.dump(dict(x0=x0, y1=y1, pas=pas, lignes=arr.shape[0], colonnes=arr.shape[1], crs=f"EPSG:{c['epsg']}", source=nom, couche=c["couche"]), open(f"{dos}/no2_moyan.json", "w"))
+    v = arr[np.isfinite(arr)]
+    print(f"air {nom} {dep} : carte régionale de {arr.shape[0]} x {arr.shape[1]} cases de {pas:.0f} m, {100 * v.size / arr.size:.0f} % valides, NO2 moyen {v.mean():.1f}, max {v.max():.0f}", flush=True)
 
 
 def region_de(dep):
@@ -301,7 +338,10 @@ def tout(dep, neuf=False):
     admin()
     osm(region_de(dep), neuf)
     cerema(dep)
-    air(dep)
+    try:                       # l'air est un plus : un serveur régional en panne ne doit pas empêcher de traiter le département
+        air(dep)
+    except (Exception, SystemExit) as ex:
+        print(f"air : téléchargement impossible pour le département {dep} ({type(ex).__name__} : {str(ex)[:150]}), département traité sans air ; relancer plus tard  python air.py", flush=True)
 
 
 def prealable(deps, neuf=False):

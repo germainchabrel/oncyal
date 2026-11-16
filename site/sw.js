@@ -4,7 +4,7 @@
    - la page est d'abord demandée au réseau (pour les mises à jour), puis lue en cache si le réseau manque ;
    - le fond de carte OpenStreetMap et les services de recherche ne sont pas mis en cache (politique d'usage d'OSM).
    VERSION change à chaque régénération des données (mise_a_jour_06.py) : l'ancien cache est alors supprimé. */
-var VERSION = 'oncyal-2026-11-15e';
+var VERSION = 'oncyal-2026-11-16-1958';
 var LEAFLET = ['https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css', 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js',
   'https://cdn.jsdelivr.net/npm/opening_hours@3.15.0/build/opening_hours.min.js'];
 var COQUILLE = ['./', 'index.html', 'manifest.webmanifest', 'favicon.svg', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png',

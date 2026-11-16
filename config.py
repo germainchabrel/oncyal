@@ -42,7 +42,7 @@ GEOFABRIK = {
 REGION = next((r for r, d in GEOFABRIK.items() if DEP in d.split()), None)
 ATMOSUD = set("04 05 06 13 83 84".split())           # départements couverts par la modélisation fine d'AtmoSud
 
-# Cartes d'air des autres agences régionales (moyenne annuelle de NO2, valeurs brutes) : voir telecharge.py.
+# Cartes d'air des autres agences régionales (moyenne annuelle de NO2) : voir telecharge.py.
 # « wcs » : serveur GeoServer, couche téléchargée à 25 m ; « tif » : un fichier pour toute la région.
 AIR = {
     "Atmo Auvergne-Rhône-Alpes": dict(deps="01 03 07 15 26 38 42 43 63 69 73 74", wcs="https://sig.atmo-auvergnerhonealpes.fr/geoserver/ows",
@@ -55,6 +55,23 @@ AIR = {
                                  couche="mod_pays_de_la_loire_2025__mod_pays_de_la_loire_2025_NO2_Moy", epsg=2154, pas=10.0),
     "Atmo Normandie": dict(deps="14 27 50 61 76", tif="Normandie_Moyenne_annuelle_2025_NO2.tif",
                            capacites="https://api.atmonormandie.fr/index.php/lizmap/service/?repository=hmodelisation&project=mod_normandie_moyenne_annuelle_no2&SERVICE=WMS&REQUEST=GetCapabilities"),
+    # « wcs_entier » : carte régionale à maille large (500 m), téléchargée en une fois
+    "Atmo Bourgogne-Franche-Comté": dict(deps="21 25 39 58 70 71 89 90", wcs_entier="https://geoserver.atmo-bfc.org/geoserver/ows",
+                                         couche="modelisation__mod_bfc_2025_no2_moyan", epsg=3035, annee=2025),
+    # Agences qui ne publient que l'image de la carte : valeurs relues d'après les couleurs (voir air_couleurs.py).
+    # « export » : serveur ArcGIS dynamique ; « tuiles » : tuiles en cache (z = niveau de zoom) ; « wms » : service WMS.
+    "Atmo Hauts-de-France": dict(deps="02 59 60 62 80", export="https://sig.atmo-hdf.fr/server/rest/services/FE_An_NO2/MapServer", couche=7, annee=2025),
+    "Atmo Grand Est": dict(deps="08 10 51 52 54 55 57 67 68 88", annee=2025, z=12,
+                           tuiles="https://portailsig.atmo-grandest.eu/server/rest/services/Hosted/mod_grandest_2025_no2_moyan/MapServer"),
+    "Air Breizh": dict(deps="22 29 35 56", wms="https://datacarto.airbreizh.asso.fr/wms", couche="raster_2023_2023_bzh_NO2_esmAS_moya_2023_WGS84_REG_tif", annee=2023),
+    "Lig'Air": dict(deps="18 28 36 37 41 45", wms="https://datacarto.opendata-ligair.fr/wms",
+                    couche="mod_centre_val_de_loire_2025_mod_centre_val_de_loire_2025_no2_moyan_tif", annee=2025),
+    "Atmo Occitanie": dict(deps="09 11 12 30 31 32 34 46 48 65 66 81 82", annee=2017, z=11, rapport=0.7,
+                           tuiles="https://tiles.arcgis.com/tiles/7Sr9Ek9c1QTKmbwr/arcgis/rest/services/mod_occitanie_2017_no2_moyan/MapServer",
+                           dessus=[("https://tiles.arcgis.com/tiles/7Sr9Ek9c1QTKmbwr/arcgis/rest/services/mod_ppatoulouse_2025_no2_moyan/MapServer", 12), ("https://tiles.arcgis.com/tiles/7Sr9Ek9c1QTKmbwr/arcgis/rest/services/mod_ppamontpellier_2025_no2_moyan/MapServer", 12),
+                                   ("https://tiles.arcgis.com/tiles/7Sr9Ek9c1QTKmbwr/arcgis/rest/services/mod_ppanimes_2025_no2_moyan/MapServer", 12), ("https://tiles.arcgis.com/tiles/7Sr9Ek9c1QTKmbwr/arcgis/rest/services/mod_cuperpignan_2025_no2_moyan/MapServer", 12)]),
+    "Qualitair Corse": dict(deps="2A 2B", annee=2025, z=12,
+                            tuiles="https://tiles.arcgis.com/tiles/VQopoXNvUqHYZHjY/arcgis/rest/services/2025_NO2_MA_200M_AIRES_tif/MapServer"),
 }
 # Bruit : départements absents du jeu national du Cerema (métropole du Grand Paris), publiés par la DRIEAT Île-de-France
 # sur data.gouv.fr ; fin du titre du lot. Les lots de l'Essonne et du Val-d'Oise complètent ceux du Cerema.

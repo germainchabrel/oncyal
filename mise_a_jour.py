@@ -3,8 +3,10 @@ Mise à jour des données d'Oncyal, département par département.
 
   python mise_a_jour.py 83 13          traite ces départements, puis réassemble tout le site
   python mise_a_jour.py --tous         retraite tous les départements déjà présents dans out/dep
-  python mise_a_jour.py --assembler    réassemble seulement (out/tuiles -> site/tuiles)
+  python mise_a_jour.py --assembler    réassemble seulement
   option --osm-neuf                    retélécharge d'abord la dernière extraction OpenStreetMap de la région
+  option --reprendre                   saute les départements déjà traités jusqu'au bout (après une interruption)
+  option --sans-assembler              ne réassemble pas à la fin (plusieurs séries lancées en parallèle)
 
 Les données de travail (data/, out/) sont dans le dossier « oncyal-donnees » du dossier personnel, hors du projet
 (voir config.py). Pour chaque département, dans l'ordre :
@@ -81,6 +83,12 @@ def main():
         args = sorted(os.path.basename(os.path.dirname(f)) for f in glob.glob(os.path.join(DONNEES, "out", "dep", "*", "reseau.csv.gz")))
     t0, rates = time.time(), []
     for dep in args:
+        d = os.path.join(DONNEES, "out", "dep", dep)
+        if "--reprendre" in sys.argv and os.path.exists(os.path.join(d, "poi.json")) and os.path.exists(os.path.join(d, "reseau.csv.gz")):
+            print(f"[{dep}] déjà traité", flush=True); continue
+        for reste in (os.path.join(d, "reseau.csv.gz.echec"), os.path.join(d, "reseau.csv.gz.tmp")):
+            if os.path.exists(reste):
+                os.remove(reste)
         if not traiter(dep, "--osm-neuf" in sys.argv):
             rates.append(dep)
     if "--sans-assembler" not in sys.argv:
